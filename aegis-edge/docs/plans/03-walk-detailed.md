@@ -95,7 +95,8 @@ Legend: **[HUMAN]** = on-hardware/browser only · **[AI]** = scaffolded artifact
 - **Do:** capture a `--continuous` log of `Predictions (DSP: X ms, Classification: Y ms ...)`.
   Parse it with [`../../scripts/serial-bench-parse.py`](../../scripts/serial-bench-parse.py)
   and paste the result into [`../../benchmark/BENCHMARK.md`](../../benchmark/BENCHMARK.md).
-  Optionally re-run at the part's full ~40 MHz.
+  (Re-clocking to the part's ~40 MHz max would need a custom clock config in Option-B
+  firmware — out of scope for Walk, which is Option-A only.)
 - **✅ Acceptance:** a measured MFCC-DSP + classify latency at 38.4 MHz, in `BENCHMARK.md`,
   **replacing the extrapolated ~400-470 ms**. This is the single most valuable
   contribution Walk makes — a real number no published source has for this board.
@@ -110,10 +111,14 @@ Legend: **[HUMAN]** = on-hardware/browser only · **[AI]** = scaffolded artifact
 | Quantity | Reference (80 MHz) | Provisional @38.4 MHz | Final (after C4 + W4) |
 |----------|--------------------|-----------------------|------------------------|
 | KWS window | 1 s | 1 s | _measure-driven_ |
-| MFCC DSP latency | ~150-170 ms | ~300-440 ms (extrapolated) | _TBD W4_ |
-| Classify latency | ~1-5 ms | ~2-10 ms | _TBD W4_ |
-| Total / window | ~225 ms | **~400-470 ms (EXTRAPOLATION)** | _TBD W4_ |
+| Total / window | **~225 ms (sourced)** | **~400-470 ms (EXTRAPOLATION)** | _TBD W4_ |
+| MFCC DSP share (illustrative) | majority of the ~225 ms | majority of the total | _TBD W4_ |
+| Classify share (illustrative) | a few ms | a few ms | _TBD W4_ |
 | Tensor arena RAM | tens of KB | tens of KB (+~16 KB audio buf) | _verify on-device_ |
+
+> Only the **~225 ms total @80 MHz** is a sourced reference figure; the DSP-vs-classify
+> split is illustrative (MFCC dominates, classify is single-digit ms) and is not a
+> measured breakdown. W4 produces the real split.
 
 > The Crawl C4 IMU measurement gives the real DSP-cost-per-unit-work on this exact
 > silicon at 38.4 MHz. Use it to rescale the MFCC estimate from a measured anchor rather
