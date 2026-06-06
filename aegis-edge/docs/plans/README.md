@@ -9,6 +9,7 @@ full plan, then the next-phase detail.
 | [`01-implementation-plan.md`](./01-implementation-plan.md) | The approved implementation plan: Crawl in full (C0-C5), verified build parameters, risk register, portfolio deliverables |
 | [`02-next-phases.md`](./02-next-phases.md) | Walk (W0-W4) + Run (R0-R4) milestone breakdowns — the phases after Crawl |
 | [`03-walk-detailed.md`](./03-walk-detailed.md) | **PROVISIONAL** detailed Walk plan (keyword spotting): impulse config, model sizing, risks. Finalized after Crawl C4 measures real latency |
+| [`04-run-detailed.md`](./04-run-detailed.md) | **PROVISIONAL** detailed Run plan (multi-sensor fusion "Smart Guardian"): R0-R4, architecture, the Option-B C++ build, fusion state machine. Finalized after C4 + W4 |
 
 ## How these relate to the rest of the repo
 

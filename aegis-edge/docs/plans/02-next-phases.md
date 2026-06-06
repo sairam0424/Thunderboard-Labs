@@ -75,6 +75,10 @@ for this board.
 
 ## RUN — Multi-sensor fusion "Smart Guardian" (the flagship)
 
+> A full milestone-by-milestone breakdown (R0-R4, architecture, fusion state machine,
+> risk register) now lives in [`04-run-detailed.md`](./04-run-detailed.md). The summary
+> below remains as the at-a-glance outline.
+
 **Goal:** a single battery-capable node that watches a space across **three sensing
 domains** — motion (IMU), sound (mic), environment (Si7021 RH/T, BMP280 pressure,
 CCS811 air quality) — runs small on-device models against each, **fuses** their outputs

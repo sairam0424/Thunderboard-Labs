@@ -11,7 +11,7 @@ A quick, scannable status of the phased build. Legend:
 | **Software layer** | Option-B C++ firmware, Web Bluetooth dashboard, CI + tests | ✅ done (C++ not compiled here — needs SSv5) |
 | **Crawl** | On-device IMU gesture recognizer | 🟡 ready for you (C0-C5 on hardware) |
 | **Walk** | On-device keyword spotting (mic) | 🟡 detailed plan written (PROVISIONAL); finalized after Crawl C4 |
-| **Run** | Multi-sensor fusion "Smart Guardian" | ⬜ outlined; needs Option-B build |
+| **Run** | Multi-sensor fusion "Smart Guardian" | 🟡 detailed plan written (PROVISIONAL); needs Option-B build + C4/W4 |
 
 ## Crawl milestones (the active phase)
 
