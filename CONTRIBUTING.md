@@ -10,12 +10,17 @@ that integrate through `develop`.
 |--------|---------|----------|
 | `main` | Released, known-good state only. Every commit is tagged (`vX.Y.Z`). Never commit directly. | permanent |
 | `develop` | Integration branch. Features merge here first; it is the "next release" line. | permanent |
-| `feat/<name>` | One feature / unit of work. Branches off `develop`, merges back into `develop`. | short-lived |
-| `fix/<name>` | A bug fix. Same flow as `feat/` (off `develop`, back to `develop`). | short-lived |
-| `release/<version>` | (optional) Stabilize a release; merges into both `main` and `develop`. | short-lived |
-| `hotfix/<name>` | (optional) Urgent fix off `main`; merges into `main` and `develop`. | short-lived |
+| `feat/<name>` | One feature / unit of work. Branches off `develop`, merges back into `develop`. | **kept** (not deleted) |
+| `fix/<name>` | A bug fix. Same flow as `feat/` (off `develop`, back to `develop`). | **kept** |
+| `release/<version>` | (optional) Stabilize a release; merges into both `main` and `develop`. | **kept** |
+| `hotfix/<name>` | (optional) Urgent fix off `main`; merges into `main` and `develop`. | **kept** |
 
 > **No `master`.** The default/trunk branch is **`main`**.
+>
+> **Feature branches are KEPT, not deleted.** This repo deviates from textbook
+> Git Flow: after a `feat/*` / `fix/*` / `docs/*` branch merges into `develop`,
+> we do **not** run `git branch -d`. Every feature branch stays alive (locally and
+> on the remote) as a permanent, browsable record of each unit of work.
 
 ### Naming examples
 
@@ -39,12 +44,14 @@ git switch -c feat/walk-keyword-spotting
 # integrate it (merge commit kept on purpose, so the feature is visible in history)
 git switch develop
 git merge --no-ff feat/walk-keyword-spotting
-git branch -d feat/walk-keyword-spotting
+# do NOT delete the branch -- we keep it (see below). Optionally push it:
+git push origin feat/walk-keyword-spotting
 ```
 
 - Always branch from an up-to-date `develop`.
 - Merge features back with **`--no-ff`** so each feature is one identifiable bubble in the graph.
-- Delete the feature branch after it merges.
+- **Keep the feature branch after it merges** -- do not run `git branch -d`. Every
+  feature branch stays alive (and gets pushed) as a permanent record of the work.
 
 ## Releasing
 
