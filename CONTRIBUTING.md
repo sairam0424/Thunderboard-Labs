@@ -32,39 +32,59 @@ feat/run-sensor-fusion      release/0.2.0
 
 Use kebab-case after the `feat/` or `fix/` prefix; keep names short and descriptive.
 
-## Day-to-day flow
+## Day-to-day flow (PR-based)
+
+Features integrate into `develop` through a **GitHub Pull Request**, never a direct
+local `git merge` into `develop`.
 
 ```bash
 # start a feature
 git switch develop
+git pull                       # make sure develop is current with origin
 git switch -c feat/walk-keyword-spotting
 
 # ... do the work, commit in atomic steps ...
 
-# integrate it (merge commit kept on purpose, so the feature is visible in history)
-git switch develop
-git merge --no-ff feat/walk-keyword-spotting
-# do NOT delete the branch -- we keep it (see below). Optionally push it:
-git push origin feat/walk-keyword-spotting
+# push the branch and open a PR against develop
+git push -u origin feat/walk-keyword-spotting
+gh pr create --base develop --head feat/walk-keyword-spotting \
+  --title "feat(aegis-edge): walk-phase keyword spotting" \
+  --body  "Summary + test plan"
+
+# after review, merge the PR (keep the branch -- do NOT use --delete-branch)
+gh pr merge feat/walk-keyword-spotting --merge      # a real merge commit (no fast-forward)
+
+# bring local develop up to the merged remote
+git switch develop && git pull
 ```
 
 - Always branch from an up-to-date `develop`.
-- Merge features back with **`--no-ff`** so each feature is one identifiable bubble in the graph.
-- **Keep the feature branch after it merges** -- do not run `git branch -d`. Every
-  feature branch stays alive (and gets pushed) as a permanent record of the work.
+- **Integrate via PR** (`gh pr create` -> `gh pr merge --merge`), so each feature has a
+  reviewable, GitHub-tracked merge commit. Do **not** `git merge` into `develop` locally.
+- Use a **merge commit** (`--merge`, not `--squash`/`--rebase`) so each feature stays one
+  identifiable bubble in the graph.
+- **Keep the feature branch after it merges** -- do not pass `--delete-branch` and do not
+  run `git branch -d`. Every feature branch stays alive as a permanent record.
+
+> Note: in this environment a safety hook blocks the assistant from running `git push`
+> (it points to `gh pr create` instead). `gh pr create` pushes the branch for you, so the
+> assistant can open PRs; the human runs any standalone `git push` (e.g. the initial
+> develop/main sync, or pushing a branch before the PR).
 
 ## Releasing
 
-When `develop` reaches a milestone worth marking:
+When `develop` reaches a milestone worth marking, release via PR too:
 
 ```bash
-git switch main
-git merge --no-ff develop
+gh pr create --base main --head develop --title "Release v0.2.0" --body "..."
+gh pr merge --merge                    # develop -> main via PR
+git switch main && git pull
 git tag -a v0.2.0 -m "Walk phase: on-device keyword spotting"
-# update CHANGELOG.md, then merge main back to develop if the release made commits
+git push origin v0.2.0                 # (human runs the push)
+# update CHANGELOG.md
 ```
 
-`main` advances only through these release merges, and each carries a version tag.
+`main` advances only through these release PRs, and each carries a version tag.
 
 ## Commit messages — Conventional Commits
 
