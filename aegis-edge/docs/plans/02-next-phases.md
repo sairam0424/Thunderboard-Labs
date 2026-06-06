@@ -140,5 +140,7 @@ Guardian and the portfolio centerpiece.
 
 Crawl is scaffolded and ready. The next concrete step is **the human executing Crawl
 milestones C0 -> C5 on the board**, following the `runbooks/`. When **C4** yields the
-measured 38.4 MHz latency, that number unlocks the detailed (vs. outlined) Walk plan —
-which will be added here as `03-walk-detailed.md` on its own feature branch.
+measured 38.4 MHz latency, that number finalizes the **provisional** detailed Walk plan,
+[`03-walk-detailed.md`](./03-walk-detailed.md) — which is written and ready to start, with
+its latency targets explicitly flagged as extrapolations to be replaced by the C4/W4
+measurements.

@@ -10,7 +10,7 @@ A quick, scannable status of the phased build. Legend:
 | **Scaffold** | Workspace, runbooks, scripts, templates | ✅ done |
 | **Software layer** | Option-B C++ firmware, Web Bluetooth dashboard, CI + tests | ✅ done (C++ not compiled here — needs SSv5) |
 | **Crawl** | On-device IMU gesture recognizer | 🟡 ready for you (C0-C5 on hardware) |
-| **Walk** | On-device keyword spotting (mic) | ⬜ outlined; detailed after Crawl C4 |
+| **Walk** | On-device keyword spotting (mic) | 🟡 detailed plan written (PROVISIONAL); finalized after Crawl C4 |
 | **Run** | Multi-sensor fusion "Smart Guardian" | ⬜ outlined; needs Option-B build |
 
 ## Crawl milestones (the active phase)
@@ -46,7 +46,8 @@ A quick, scannable status of the phased build. Legend:
 ## Next concrete action
 
 Open [`../../runbooks/C0-setup.md`](../../runbooks/C0-setup.md) and run the C0 steps on
-the board. When C4 gives the measured 38.4 MHz latency, ping to produce the detailed
-Walk plan (`03-walk-detailed.md`).
+the board. The provisional detailed Walk plan
+([`03-walk-detailed.md`](./03-walk-detailed.md)) is written and ready; its latency
+targets get finalized once Crawl **C4** measures the real 38.4 MHz number.
 
 _Last updated: 2026-06-06._
