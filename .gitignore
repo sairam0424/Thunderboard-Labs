@@ -1,0 +1,34 @@
+# ============================================================
+# Thunderboard Labs — repo-wide ignore rules
+# ============================================================
+
+# --- Node / Edge Impulse CLI ---
+node_modules/
+# Local EI project exports / config dumps (keep the canonical .zip out of history)
+ei-*.json
+
+# --- Build outputs / firmware binaries ---
+build/
+*.bin
+*.hex
+*.s37
+*.axf
+*.o
+
+# --- Simplicity Studio 5 / Gecko SDK build artifacts ---
+GNU ARM v*/
+autogen/
+
+# --- Python tooling (helper scripts) ---
+__pycache__/
+*.pyc
+.venv/
+
+# --- OS cruft ---
+.DS_Store
+
+# --- Local tooling state (gstack browser audit, etc.) ---
+.gstack/
+
+# --- Private workspace (daily logs, scratch notes) ---
+scratch-pad/
