@@ -1,0 +1,403 @@
+/*
+ * Aegis Edge - Web Bluetooth Dashboard styles
+ * ===========================================
+ * Clean, modern, dark-theme UI. The gesture name is the hero element; the
+ * confidence bar animates smoothly. Per-class accent colors mirror the
+ * board's suggested LED colors:
+ *   circle=blue, zigzag=green, updown=red, leftright=purple, none=off.
+ */
+
+/* ------------------------------------------------------------------ *
+ * Design tokens
+ * ------------------------------------------------------------------ */
+:root {
+  --bg: #0b0f17;
+  --bg-elev: #141a26;
+  --bg-elev-2: #1c2433;
+  --border: #283041;
+  --text: #e7ecf3;
+  --text-dim: #97a3b6;
+  --text-faint: #5d6b82;
+
+  --accent: #4f8cff; /* primary brand blue */
+  --accent-2: #22d3a6; /* action green-teal */
+
+  /* Per-class accent colors (match board LED suggestions). */
+  --class-circle: #3b82f6; /* blue */
+  --class-zigzag: #22c55e; /* green */
+  --class-updown: #ef4444; /* red */
+  --class-leftright: #a855f7; /* purple */
+  --class-none: #5d6b82; /* off / muted */
+
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+}
+
+/* ------------------------------------------------------------------ *
+ * Base
+ * ------------------------------------------------------------------ */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(79, 140, 255, 0.12), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(34, 211, 166, 0.10), transparent 60%),
+    var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+.app {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(20px, 4vw, 40px);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* ------------------------------------------------------------------ *
+ * Header / brand
+ * ------------------------------------------------------------------ */
+.app__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand__mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 6px 18px rgba(79, 140, 255, 0.4);
+  flex: none;
+}
+
+.brand__title {
+  margin: 0;
+  font-size: 1.35rem;
+  letter-spacing: 0.2px;
+}
+
+.brand__subtitle {
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+}
+
+/* ------------------------------------------------------------------ *
+ * Status pill
+ * ------------------------------------------------------------------ */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  font-size: 0.82rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.status-pill__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  flex: none;
+}
+
+.status-pill.is-disconnected .status-pill__dot {
+  background: #6b7280;
+}
+.status-pill.is-connecting .status-pill__dot {
+  background: #f59e0b;
+  animation: pulse 1s ease-in-out infinite;
+}
+.status-pill.is-connected .status-pill__dot {
+  background: #22c55e;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.18);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* ------------------------------------------------------------------ *
+ * Controls / buttons
+ * ------------------------------------------------------------------ */
+.controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.18s ease, border-color 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: #3a455c;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  background: linear-gradient(135deg, var(--accent), #3b6fe0);
+  border-color: transparent;
+  color: #fff;
+}
+
+.btn--accent {
+  background: linear-gradient(135deg, var(--accent-2), #16b48c);
+  border-color: transparent;
+  color: #06241c;
+}
+
+/* When inference is running, the toggle reads as a "stop" affordance. */
+.btn--accent[data-running="true"] {
+  background: linear-gradient(135deg, #ff6b6b, #e23b3b);
+  color: #fff;
+}
+
+.btn--ghost {
+  background: transparent;
+}
+
+.btn--mini {
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+/* ------------------------------------------------------------------ *
+ * Gesture card (hero)
+ * ------------------------------------------------------------------ */
+.gesture-card {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 28px 24px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.gesture-card__eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.gesture-card__name {
+  margin: 10px 0 22px;
+  font-size: clamp(2.6rem, 9vw, 4.4rem);
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1.05;
+  color: var(--class-none);
+  transition: color 0.25s ease, text-shadow 0.25s ease;
+}
+
+/* Per-class coloring + a soft matching glow, driven by data-class in app.js. */
+.gesture-card__name[data-class="circle"] {
+  color: var(--class-circle);
+  text-shadow: 0 0 34px rgba(59, 130, 246, 0.45);
+}
+.gesture-card__name[data-class="zigzag"] {
+  color: var(--class-zigzag);
+  text-shadow: 0 0 34px rgba(34, 197, 94, 0.45);
+}
+.gesture-card__name[data-class="updown"] {
+  color: var(--class-updown);
+  text-shadow: 0 0 34px rgba(239, 68, 68, 0.45);
+}
+.gesture-card__name[data-class="leftright"] {
+  color: var(--class-leftright);
+  text-shadow: 0 0 34px rgba(168, 85, 247, 0.45);
+}
+.gesture-card__name[data-class="none"] {
+  color: var(--class-none);
+  text-shadow: none;
+}
+
+/* ----- Confidence bar ----- */
+.confidence {
+  margin-top: 6px;
+}
+
+.confidence__track {
+  height: 14px;
+  border-radius: 999px;
+  background: var(--bg-elev-2);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.confidence__fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  /* Smooth, GPU-friendly width animation as new results arrive. */
+  transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.confidence__label {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+}
+
+.confidence__value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.gesture-card__raw {
+  margin: 18px 0 0;
+  font-size: 0.74rem;
+  color: var(--text-faint);
+}
+
+.gesture-card__rawhex {
+  font-family: var(--mono);
+  color: var(--text-dim);
+  word-break: break-all;
+}
+
+/* ------------------------------------------------------------------ *
+ * Event log
+ * ------------------------------------------------------------------ */
+.log {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+
+.log__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.log__title {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.log__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 230px;
+  overflow-y: auto;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+}
+
+.log__item {
+  display: flex;
+  gap: 10px;
+  padding: 5px 2px;
+  border-bottom: 1px solid rgba(40, 48, 65, 0.5);
+}
+
+.log__item:last-child {
+  border-bottom: none;
+}
+
+.log__time {
+  color: var(--text-faint);
+  flex: none;
+}
+
+.log__text {
+  color: var(--text);
+  word-break: break-word;
+}
+
+.log__item--success .log__text { color: #5fe6b0; }
+.log__item--warn .log__text { color: #f5c451; }
+.log__item--error .log__text { color: #ff8080; }
+
+/* ------------------------------------------------------------------ *
+ * Footer
+ * ------------------------------------------------------------------ */
+.app__footer {
+  font-size: 0.74rem;
+  color: var(--text-faint);
+  text-align: center;
+  padding: 4px 8px 12px;
+}
+
+.app__footer strong {
+  color: var(--text-dim);
+}
+
+/* ------------------------------------------------------------------ *
+ * Reduced motion - respect user preference
+ * ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .confidence__fill,
+  .gesture-card__name {
+    transition: none;
+  }
+  .status-pill.is-connecting .status-pill__dot {
+    animation: none;
+  }
+}

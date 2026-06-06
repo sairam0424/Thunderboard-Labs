@@ -129,5 +129,5 @@ benchmark. The reference numbers below are **confirm-on-device**:
 
 The true 38.4MHz number is unpublished — **measuring it is the deliverable.**
 Capture it via `edge-impulse-run-impulse --continuous` (see
-[`../runbooks/C4-deploy-verify.md`](../runbooks/C4-deploy-verify.md)), which
+[`../runbooks/C4-verify-benchmark.md`](../runbooks/C4-verify-benchmark.md)), which
 prints `Predictions (DSP: X ms., Classification: Y ms., Anomaly: Z ms.)`.

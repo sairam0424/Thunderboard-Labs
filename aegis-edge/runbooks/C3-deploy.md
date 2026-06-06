@@ -24,7 +24,7 @@ EFR32MG12P332F1024GL125, Cortex-M4F @ 38.4 MHz, 256 KB RAM, 1 MB flash, no NPU).
       conceptual guide). Do **not** deploy a model you have not test-set
       validated — training accuracy alone is not acceptance.
 - [ ] `edge-impulse-cli` installed and working (`edge-impulse-daemon --version`
-      prints a version). See [`B1-tooling.md`](./B1-tooling.md) if it does not.
+      prints a version). See [`C0-setup.md`](./C0-setup.md) if it does not.
 - [ ] The board enumerates as the `TB004` USB drive when plugged in (it ships
       with stock firmware that exposes this; the EI prebuilt firmware also
       exposes it). Confirm the drive mounts before you start.
