@@ -6,6 +6,22 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- **Option-B C++ firmware integration** (`aegis-edge/firmware-option-b/src/`) —
+  `run_classifier_continuous()` loop, gesture -> RGB-LED mapping, and CCCD-gated
+  GATT notify via the GSDK 4.x `sl_bt` API. Not compiled here (needs Simplicity
+  Studio 5 + GSDK 4.0.2); the Run-phase firmware foundation.
+- **Web Bluetooth dashboard** (`aegis-edge/dashboard/`) — a browser alternative
+  to the phone app that reads live inference over the verified BLE UUIDs; runs in
+  Chrome/Edge from `localhost`.
+- **CI + tests + tooling** — `.github/workflows/ci.yml` (shellcheck, pytest,
+  relative-link check), a 12-test pytest suite for `serial-bench-parse.py`, and a
+  `Makefile` of dev tasks.
+
+### Fixed
+- Repaired 4 pre-existing broken relative links in the runbooks/config docs.
+- Aligned the firmware<->dashboard confidence-scale contract on 0..100 percent.
+
 ### Planned
 - Aegis Edge **Walk** phase — on-device keyword spotting (ICS-43434 mic); detailed
   after Crawl yields the real on-device 38.4 MHz latency baseline.
