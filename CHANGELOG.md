@@ -6,6 +6,15 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Planned
+- **Crawl execution (on hardware)** — milestones C0 -> C5; C4 measures the real
+  on-device 38.4 MHz latency, which finalizes the provisional Walk/Run plans.
+
+## [0.2.0] - 2026-06-06
+
+The buildable software layer plus the complete phase-by-phase plan set. After this
+release the critical path is on-hardware Crawl execution.
+
 ### Added
 - **Option-B C++ firmware integration** (`aegis-edge/firmware-option-b/src/`) —
   `run_classifier_continuous()` loop, gesture -> RGB-LED mapping, and CCCD-gated
@@ -17,15 +26,19 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **CI + tests + tooling** — `.github/workflows/ci.yml` (shellcheck, pytest,
   relative-link check), a 12-test pytest suite for `serial-bench-parse.py`, and a
   `Makefile` of dev tasks.
+- **Complete plan set** (`aegis-edge/docs/plans/`) — `01-implementation-plan` (Crawl
+  C0-C5), `02-next-phases` (overview), `03-walk-detailed` (W0-W4), `04-run-detailed`
+  (R0-R4), `STATUS`, and `README`. Walk/Run are provisional pending Crawl C4.
+- **`aegis-edge/START-HERE.md`** — condensed bench-ready C0-C5 checklist.
+
+### Changed
+- Adopted a **PR-based merge workflow** (features merge into `develop` via PR, not
+  local merge) and a **keep-feature-branches** policy; documented in `CONTRIBUTING.md`.
+- Polished the root `README.md` to reflect the full repo layout and status.
 
 ### Fixed
 - Repaired 4 pre-existing broken relative links in the runbooks/config docs.
 - Aligned the firmware<->dashboard confidence-scale contract on 0..100 percent.
-
-### Planned
-- Aegis Edge **Walk** phase — on-device keyword spotting (ICS-43434 mic); detailed
-  after Crawl yields the real on-device 38.4 MHz latency baseline.
-- Aegis Edge **Run** phase — multi-sensor fusion "Smart Guardian" (Option B, C++).
 
 ## [0.1.0] - 2026-06-06
 
@@ -53,5 +66,6 @@ scaffolded, ready-to-build Aegis Edge Crawl phase.
 - On-device latency at 38.4 MHz is intentionally left as a measure-on-device
   deliverable rather than an assumed figure.
 
-[Unreleased]: https://example.invalid/compare/v0.1.0...HEAD
-[0.1.0]: https://example.invalid/releases/tag/v0.1.0
+[Unreleased]: https://github.com/sairam0424/Thunderboard-Labs/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/sairam0424/Thunderboard-Labs/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/sairam0424/Thunderboard-Labs/releases/tag/v0.1.0
