@@ -1,0 +1,143 @@
+# Aegis Edge - Continuous Integration
+# ---------------------------------------------------------------------------
+# Lints and tests ONLY the parts that can run without the physical board or the
+# Silicon Labs / ARM toolchain:
+#   - shellcheck on the host helper scripts (aegis-edge/scripts/*.sh)
+#   - Python 3.12: ruff lint + pytest for the benchmark log parser tests
+#   - a lightweight grep-based relative-link checker over the Markdown docs
+#
+# NOT covered here (cannot run in CI - honest scope):
+#   - The C++ firmware (firmware-option-b/) requires GSDK 4.0.2 + GNU Arm
+#     10-2020-q4-major and is built in Simplicity Studio 5, not on a runner.
+#   - The Web Bluetooth dashboard needs a Chromium browser + a live board;
+#     it is not exercised here.
+#
+# Repo layout note: this file lives at <repo-root>/.github/workflows/ci.yml and
+# the project sources live under <repo-root>/aegis-edge/. Paths below are
+# relative to the repo root (the default working directory).
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+# Cancel superseded runs on the same ref to save runner minutes.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # (a) Shellcheck the host helper scripts.
+  # ---------------------------------------------------------------------------
+  shellcheck:
+    name: shellcheck (scripts/*.sh)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Run shellcheck on all shell scripts
+        # The scripts are bash (#!/usr/bin/env bash, set -euo pipefail). Fail the
+        # job on any finding. Glob is guarded so an empty match is not silently
+        # skipped.
+        run: |
+          shopt -s nullglob
+          scripts=(aegis-edge/scripts/*.sh)
+          if [ ${#scripts[@]} -eq 0 ]; then
+            echo "No shell scripts found under aegis-edge/scripts/ - nothing to check."
+            exit 0
+          fi
+          echo "Checking: ${scripts[*]}"
+          shellcheck --shell=bash "${scripts[@]}"
+
+  # ---------------------------------------------------------------------------
+  # (b) Python lint + tests for the benchmark parser.
+  # ---------------------------------------------------------------------------
+  python:
+    name: python (ruff + pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install lint + test tooling
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install ruff pytest
+
+      - name: Ruff lint (scripts/)
+        # The parser is stdlib-only; ruff catches style + obvious bugs.
+        run: ruff check aegis-edge/scripts
+
+      - name: Pytest
+        # Tests import serial-bench-parse.py by file path (hyphenated name) via
+        # importlib, so no package install is needed. Run from the scripts dir
+        # so the importlib path in the tests resolves.
+        working-directory: aegis-edge
+        run: python -m pytest scripts/tests -v
+
+  # ---------------------------------------------------------------------------
+  # (c) Markdown relative-link checker (grep-based, zero external actions).
+  # ---------------------------------------------------------------------------
+  markdown-links:
+    name: markdown link check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check relative Markdown links resolve
+        # Verifies that every relative link target [text](path) in tracked .md
+        # files exists on disk. Skips external (http/https/mailto), in-page
+        # anchors (#...), and protocol-relative (//) targets. Anchors appended
+        # to a relative path (file.md#section) are stripped before the check.
+        run: |
+          broken_marker="$(mktemp)"
+          # Iterate Markdown files with a NUL-delimited find loop (portable,
+          # no mapfile/bash-4 dependency, safe with spaces in paths). Skip
+          # vendored / build dirs.
+          while IFS= read -r -d '' md; do
+            dir="$(dirname "$md")"
+            # Extract the (target) portion of every [text](target) link.
+            # grep -oE pulls the whole match; sed isolates the URL inside ().
+            grep -oE '\]\([^)]+\)' "$md" 2>/dev/null \
+              | sed -E 's/^\]\(([^)]+)\)$/\1/' \
+              | while IFS= read -r link; do
+                  # Skip externals, anchors, mailto, protocol-relative.
+                  case "$link" in
+                    http://*|https://*|mailto:*|//*|"#"*) continue ;;
+                  esac
+                  # Strip any #anchor and ?query suffix from the path.
+                  path="${link%%#*}"
+                  path="${path%%\?*}"
+                  [ -z "$path" ] && continue
+                  target="$dir/$path"
+                  if [ ! -e "$target" ]; then
+                    echo "BROKEN LINK in $md -> $link (resolved: $target)"
+                    # Surface failure out of the (piped) subshell via a marker.
+                    echo "broken" >> "$broken_marker"
+                  fi
+                done
+          done < <(find . \
+            -type d \( -name node_modules -o -name .git -o -name build \) -prune -false \
+            -o -type f -name '*.md' -print0)
+
+          if [ -s "$broken_marker" ]; then
+            echo "One or more relative Markdown links are broken (see above)."
+            exit 1
+          fi
+          echo "All relative Markdown links resolve."

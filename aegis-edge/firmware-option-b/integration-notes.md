@@ -127,9 +127,9 @@ void on_classification(const char *label, float conf) {
         return;
     }
     if      (!strcmp(label, "circle"))    BOARD_rgbledSetColor(0,   0,   255); // blue
-    else if (!strcmp(label, "zigzag"))    BOARD_rgbledSetColor(255, 0,   0);   // red
-    else if (!strcmp(label, "updown"))    BOARD_rgbledSetColor(0,   255, 0);   // green
-    else if (!strcmp(label, "leftright")) BOARD_rgbledSetColor(255, 128, 0);   // orange
+    else if (!strcmp(label, "zigzag"))    BOARD_rgbledSetColor(0,   255, 0);   // green
+    else if (!strcmp(label, "updown"))    BOARD_rgbledSetColor(255, 0,   0);   // red
+    else if (!strcmp(label, "leftright")) BOARD_rgbledSetColor(128, 0,   128); // purple
     else /* "none" */                     BOARD_rgbledSetColor(0,   0,   0);   // off
 
     ble_notify_result(label, conf);
@@ -139,9 +139,9 @@ void on_classification(const char *label, float conf) {
 | Class       | Suggested color | RGB (confirm-on-device) |
 |-------------|-----------------|-------------------------|
 | `circle`    | blue            | `(0, 0, 255)`           |
-| `zigzag`    | red             | `(255, 0, 0)`           |
-| `updown`    | green           | `(0, 255, 0)`           |
-| `leftright` | orange          | `(255, 128, 0)`         |
+| `zigzag`    | green           | `(0, 255, 0)`           |
+| `updown`    | red             | `(255, 0, 0)`           |
+| `leftright` | purple          | `(128, 0, 128)`         |
 | `none`      | off             | `(0, 0, 0)`             |
 
 ---
