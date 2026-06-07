@@ -14,6 +14,18 @@
 > Prescriptive counterparts: [`../runbooks/C2-train.md`](../runbooks/C2-train.md)
 > and [`../runbooks/C3-deploy.md`](../runbooks/C3-deploy.md).
 
+> **Update (2026-06-08) -- C3 and C4 were resolved after this session.** This file
+> remains the honest, dated record of a session that stopped mid-C3-verify, so the
+> "IN PROGRESS" / "EXPECTED" labels below are left intact as history. Since then,
+> C3 and C4 were confirmed on-device: the model streams live predictions
+> (Circle -> 0.84, LeftRight -> 0.97, Random(still) -> 0.996, ZigZag -> 0.81) and
+> measured latency is **~87.5 ms total / ~86 ms DSP @ 38.4 MHz** (~5x the 80 MHz
+> reference, not the ~2x extrapolated here -- root cause was the FFT length 16
+> falling back to a software FFT). The EON Tuner run also completed and the
+> hand-tuned 85% model was kept. Only **C5** (offline BLE phone demo) remains, and
+> it is optional polish. See [`01-results-and-readings.md`](./01-results-and-readings.md)
+> and [`../benchmark/BENCHMARK.md`](../benchmark/BENCHMARK.md).
+
 ---
 
 ## C2 -- Impulse design + training
@@ -225,6 +237,19 @@ and moved on to deployment.
 ---
 
 ## C3 -- Deploy (IN PROGRESS)
+
+> **Update (2026-06-08):** After this session, **C3 and C4 were confirmed
+> on-device.** The model streams live predictions (Circle -> 0.84,
+> LeftRight -> 0.97, Random(still) -> 0.996, ZigZag -> 0.81) and measured latency
+> is **~87.5 ms total / ~86 ms DSP @ 38.4 MHz**. Getting there needed a full
+> **power-cycle (not just RESET)** to clear a wedged I2C bus, plus running with
+> `--debug`. The `--debug` output also revealed the FFT length 16 falls below the
+> EFR32 hardware-FFT minimum of 32, so the DSP runs a **software FFT** (`HW RFFT
+> failed... size was 16`) -- that is why real latency is ~5x the 80 MHz reference
+> rather than the ~2x extrapolated below; FFT length 32/64 is the documented
+> speedup lever. The "IN PROGRESS" text below is kept as the dated historical
+> record. See [`01-results-and-readings.md`](./01-results-and-readings.md) and
+> [`../benchmark/BENCHMARK.md`](../benchmark/BENCHMARK.md).
 
 **Goal of this phase.** Build a ready-to-flash firmware image from the 85% impulse
 and run it live on the board, streaming predictions. See the prescriptive runbook

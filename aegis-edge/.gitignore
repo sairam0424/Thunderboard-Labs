@@ -25,3 +25,10 @@ __pycache__/
 
 # --- Private workspace (daily logs, scratch notes) ---
 scratch-pad/
+
+# --- Demo media: ignore only the raw videos, NOT the committed screenshots/stills ---
+# (the demo/ folder keeps screenshots/ + frames/ PNGs in git; videos stay out -- see
+# the root .gitignore and demo/SHOT-LIST.md)
+demo/*.mp4
+demo/*.mov
+demo/*.m4v
