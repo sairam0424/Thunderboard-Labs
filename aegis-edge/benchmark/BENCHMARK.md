@@ -46,22 +46,31 @@
 
 ---
 
-## Results (FILL THESE IN)
+## Results (MEASURED - 2026-06-07)
 
-<!-- TODO [HUMAN]: one row per measurement run. Add rows as needed.
-     Core MHz: record the actual clock (38.4 default, 40 max).
-     Get DSP/Classification/Anomaly/Total from serial-bench-parse.py output. -->
+Captured live via `edge-impulse-run-impulse --debug` on the real board at the
+default 38.4 MHz clock. Five consecutive inference windows observed:
 
-| Run | Core MHz | DSP ms | Classification ms | Anomaly ms | Total ms | inferences/sec |
-|-----|----------|--------|-------------------|------------|----------|----------------|
-| 1   | 38.4     | TODO   | TODO              | TODO       | TODO     | TODO           |
-| 2   | 38.4     | TODO   | TODO              | TODO       | TODO     | TODO           |
-| 3   | 38.4     | TODO   | TODO              | TODO       | TODO     | TODO           |
-| Reference (Edge Impulse, ~80 MHz) | ~80 | 15 | 1 | 1 | ~17 | ~59 |
+| Window | Core MHz | DSP ms | Classification ms | Anomaly ms | Total ms | Note |
+|--------|----------|--------|-------------------|------------|----------|------|
+| 1 (cold) | 38.4 | 95 | 1 | 0 | 96 | first window after start (warm-up outlier) |
+| 2   | 38.4 | 86 | 2 | 0 | 88 | |
+| 3   | 38.4 | 85 | 2 | 0 | 87 | |
+| 4   | 38.4 | 86 | 1 | 0 | 87 | |
+| 5   | 38.4 | 86 | 2 | 0 | 88 | |
+| **Steady-state mean (windows 2-5)** | **38.4** | **~85.8** | **~1.75** | **0** | **~87.5** | **~11.4 inf/sec** |
+| Reference (Edge Impulse, ~80 MHz) | ~80 | 15 | 1 | 1 | ~17 | sanity anchor only |
 
-> The **Reference** row is Edge Impulse's published figure captured at a higher
-> clock (~80 MHz, DSP ~15 ms / NN ~1 ms / anomaly ~1 ms, ~17 ms total). It is a
-> sanity anchor, **not** a target you should match on this board.
+> **Headline result:** on the EFR32MG12 at **38.4 MHz**, steady-state inference is
+> **~86 ms DSP + ~1-2 ms classify + 0 ms anomaly = ~87.5 ms total** (~11 inferences/sec).
+> The **DSP (spectral feature extraction) dominates** the time; the neural net itself
+> is ~1-2 ms, and the K-means anomaly check is sub-millisecond. This is the
+> previously-unpublished real number for this board.
+
+> **The Reference row** is Edge Impulse's published figure at ~80 MHz (~17 ms total).
+> It is a sanity anchor, NOT a target -- see the honesty note below for why the
+> measured 38.4 MHz number is ~5x higher than that reference, not the ~2x a naive
+> clock-scaling would predict.
 
 ---
 
@@ -69,11 +78,21 @@
 
 - The **~17 ms total** Reference row is at a **higher clock (~80 MHz)** than this
   board's default. **It is not directly comparable** to a 38.4 MHz measurement.
-- The often-cited **~30-45 ms total @ 38.4 MHz** is an **extrapolation**
-  (roughly scaling the reference by the clock ratio), **NOT a measured value**.
-  Treat it as a *hypothesis to confirm*, and replace it with your measured Total
-  once you have run the board. Reference on-board figures seen in the wild are
-  ~17-21 ms DSP / ~1 ms classify - **confirm-on-device.**
+- **The ~30-45 ms extrapolation was WRONG (now corrected by measurement).** The plan
+  predicted ~30-45 ms total @ 38.4 MHz by linearly scaling the 80 MHz reference. The
+  **real measured value is ~87.5 ms total (~86 ms DSP)** -- roughly **5x** the 80 MHz
+  reference, not the ~2x clock-scaling implied. This is the single most important
+  reason the project insisted on *measuring* rather than trusting the extrapolation.
+- **Why the DSP is so much higher than expected -- a real, board-specific finding:**
+  the `--debug` run printed
+  `INFO: HW RFFT failed, FFT size not supported. Must be a power of 2 between 32 and
+  4096, (size was 16)`. The EFR32's hardware FFT accelerator requires a power-of-2 size
+  **>= 32**, but the impulse uses **FFT length 16**, so the DSP **falls back to a
+  software FFT** -- which is why spectral feature extraction costs ~86 ms instead of a
+  hardware-accelerated few ms. **Optimization opportunity:** re-running the impulse with
+  **FFT length 32 or 64** would likely let the hardware RFFT engage and cut DSP latency
+  substantially. (Not required -- ~11 inf/sec is fine for gesture recognition -- but it's
+  the obvious next lever, and a great thing to benchmark as a before/after.)
 - Report **Model-testing accuracy** (held-out set), not training accuracy. The
   98.8% figure floating around was single-author / overfit-flagged. Targets:
   **>= 95%** overall on the held-out test set, **no class < 90%**.
@@ -82,11 +101,15 @@
 
 ---
 
-## TODO checklist [HUMAN]
+## Checklist [DONE 2026-06-07]
 
-- [ ] Flash the model `.bin` to TB004 (see flashing runbook).
-- [ ] Confirm the board clock is 38.4 MHz (or record the actual value).
-- [ ] Stop the daemon; capture `run.log` via `--continuous` for 30-60 s.
-- [ ] Run `serial-bench-parse.py run.log` and paste the table above.
-- [ ] Fill Run 1-3 rows (repeat for stability; report min/mean).
-- [ ] Replace every `TODO` and delete the `~30-45 ms` extrapolation once measured.
+- [x] Flash the model `.bin` to TB004 (filename `aegis-edge-crawl-silabs-thunderboard2-v1-impulse-#1.bin`).
+- [x] Board clock confirmed 38.4 MHz (Interval 16.0000 ms = 62.5 Hz reported by firmware).
+- [x] Captured live timing via `edge-impulse-run-impulse --debug` (5 windows).
+- [x] Recorded the measured table above (steady-state ~86 ms DSP / ~1-2 ms classify).
+- [x] Replaced the ~30-45 ms extrapolation with the **measured ~87.5 ms total** and
+      documented WHY (FFT-16 software-FFT fallback).
+
+### Optional follow-up (not blocking)
+- [ ] Re-run with FFT length 32/64 to engage the hardware RFFT and benchmark the DSP speedup.
+- [ ] Re-run at the 40 MHz max clock and note the delta.

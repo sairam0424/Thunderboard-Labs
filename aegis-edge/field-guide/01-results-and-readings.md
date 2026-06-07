@@ -9,13 +9,15 @@ For each milestone (C0 -> C5) it gives:
 3. **Acceptance signal** -- how you know that step actually passed
 
 Labels are honest: **OBSERVED** = it really happened this session; **EXPECTED** =
-from the runbooks, not yet seen on hardware. C3-verify, C4, and C5 are EXPECTED
-only (see [README.md](README.md) for the honest completion state).
+from the runbooks, not yet seen on hardware. As of **2026-06-07**, **C0-C4 are all
+OBSERVED** (the model runs on-device and latency was measured); only **C5** (the BLE
+phone demo) remains EXPECTED. (See [README.md](README.md) for the completion state.)
 
 > Note on the reference target: Edge Impulse Studio shows estimates against a
-> **Cortex-M4F 80 MHz** reference. The real board is **38.4 MHz** with **no NPU**,
-> so real on-device latency is roughly **2x** the Studio number. That gap is the
-> whole point of C4.
+> **Cortex-M4F 80 MHz** reference. The real board is **38.4 MHz** with **no NPU**.
+> The plan *extrapolated* ~2x the Studio number (~30-45 ms); the **measured** reality
+> was **~5x** (~87.5 ms total / ~86 ms DSP), because the FFT-16 config falls back to a
+> software FFT. That gap -- extrapolation vs. measurement -- is the whole point of C4.
 
 ---
 
@@ -254,42 +256,44 @@ Impulse design -> **Deployment**.
 | Optimization | **Quantized (int8)** selected |
 | "Run model testing before build" | Skipped -- it is OPTIONAL and does not gate or change the build |
 
-**OBSERVED this session (partial)**
+**OBSERVED this session**
 
-- Built and downloaded the `.bin`, copied it onto `/Volumes/TB004/` -- the drive
-  unmounted/remounted (the same success signal as C0).
+- Built + downloaded `aegis-edge-crawl-silabs-thunderboard2-v1-impulse-#1.bin` (310 KB),
+  copied it onto `/Volumes/TB004/` -- the drive unmounted/remounted, no `FAIL.TXT`, and
+  the board's LED began blinking (the same success signal as C0).
 - There is also a QR code + "Launch in browser" to test from a phone -- note that
-  **runs in the cloud / on the phone, NOT on-device**. Still do the real flash.
+  **runs in the cloud / on the phone, NOT on-device**. The real flash was done regardless.
 
-**Status: IN PROGRESS.** The live verification step below was **interrupted by a
-serial-port issue** (the daemon was force-killed, leaving `/dev/cu.usbmodem*`
-half-open) and is **not yet confirmed**. See the serial-port recovery in
-[troubleshooting.md](troubleshooting.md) (Ctrl+C the retry loop, press the
-physical RESET, wait ~5s, re-run).
+**Status: DONE (verified on-device 2026-06-07).** Getting to streaming predictions took two
+fixes (both now in [troubleshooting.md](troubleshooting.md) #11): a `failed to init hall
+sensor (0x0031)` I2C wedge cleared by a **full power cycle** (unplug ~15 s, not just RESET),
+and a silent inference loop fixed by running with **`--debug`**.
 
-**EXPECTED acceptance signal (NOT yet observed)**
-
-After RESET + re-run:
+**OBSERVED acceptance -- it works:**
 
 ```bash
-edge-impulse-run-impulse --continuous
+edge-impulse-run-impulse --debug
 ```
 
-Expected to stream a repeating Predictions block, e.g.:
+Real streaming output (abbreviated, gestures performed live):
 
 ```
-Predictions (DSP: 3 ms., Classification: 1 ms., Anomaly: 1 ms.):
-    Circle:     0.04
-    LeftRight:  0.02
-    Random:     0.01
-    UpDown:     0.05
-    ZigZag:     0.88
-    anomaly:    0.12
+Timing: DSP 86 ms, inference 2 ms, anomaly 0 ms
+#Classification predictions:
+  Circle: 0.000000
+  LeftRight: 0.968750   <- doing a left-right sweep
+  Random: 0.023438
+  UpDown: 0.007812
+  ZigZag: 0.000000
+...
+  Random: 0.996094      <- board held still
+...
+  ZigZag: 0.812500      <- doing a zigzag
 ```
 
-Acceptance = the top label tracks the gesture you physically perform, and
-`Random` dominates when the board is still. (Numbers above are illustrative
-EXPECTED output, not measured this session.)
+OBSERVED: the top label correctly tracked each physical gesture -- **Circle->Circle 0.84,
+LeftRight->LeftRight 0.93-0.97, Random(still)->0.996, ZigZag->0.81** -- exactly matching the
+85% model's per-class strengths (Random/LeftRight crisp; the rhythmic gestures lower-confidence).
 
 ---
 
@@ -297,25 +301,30 @@ EXPECTED output, not measured this session.)
 
 Runbook: [`../runbooks/C4-verify-benchmark.md`](../runbooks/C4-verify-benchmark.md)
 
-**Status: NOT done (EXPECTED only).**
+**Status: DONE (measured on-device 2026-06-07).** Full numbers + analysis in
+[`../benchmark/BENCHMARK.md`](../benchmark/BENCHMARK.md).
 
-**Action (EXPECTED)**
+**Action**
 
-Read the per-frame timing printed by `edge-impulse-run-impulse --continuous` on
-the **real 38.4 MHz** board (DSP + Classification + Anomaly ms), and record it
-against the Studio 80 MHz estimate.
+Read the per-frame `Timing:` line from `edge-impulse-run-impulse --debug` on the **real
+38.4 MHz** board and compare to the Studio 80 MHz estimate.
 
-**EXPECTED result**
+**MEASURED result (5 windows; steady-state = windows 2-5)**
 
-| Quantity | Studio estimate (80 MHz) | Expected on real board (38.4 MHz) |
-|---|---|---|
-| Total latency | ~17 ms | **~2x** -> roughly low-30s ms |
-| Classifier alone | ~1 ms | ~2 ms |
-| RAM | ~2.9 K | unchanged (~2.9 K) |
-| Flash | ~49 K | unchanged (~49 K) |
+| Quantity | Studio estimate (80 MHz) | Plan extrapolation (38.4 MHz) | **MEASURED (38.4 MHz)** |
+|---|---|---|---|
+| DSP | ~15 ms | (part of ~30-45) | **~86 ms** |
+| Classifier | ~1 ms | ~2 ms | **~1-2 ms** |
+| Anomaly | ~1 ms | -- | **0 ms** |
+| **Total** | ~17 ms | ~30-45 ms | **~87.5 ms (~11 inf/sec)** |
 
-Acceptance (EXPECTED) = measured total latency well under one inference window
-(2000 ms), confirming real-time on-device inference with margin. The ~2x scaling
+**The big finding:** measured total is **~5x** the 80 MHz reference, NOT the ~2x the plan
+extrapolated. Cause (from `--debug`): `HW RFFT failed... size was 16` -> the FFT-16 config
+falls back to a **software FFT**, so DSP dominates at ~86 ms. The neural net is the predicted
+~1-2 ms. Using FFT length 32/64 would let the hardware FFT engage and cut DSP substantially.
+
+Acceptance = measured total latency well under one inference window (2000 ms) -- **PASS at
+~87.5 ms**, confirming real-time on-device inference with huge margin. The ~5x scaling
 is the headline honesty point of this milestone.
 
 ---
@@ -349,6 +358,6 @@ disconnected from the data path -- a true offline edge demo.
 | C1 | 36 samples, 5 classes, 75/25 split, healthy waveform | OBSERVED -- pass |
 | C2 | 85.0% acc, ROC 0.98, anomaly cluster healthy | OBSERVED -- pass |
 | EON Tuner | Best candidate 22% < 85% -> kept baseline | OBSERVED -- pass (no change) |
-| C3 | `.bin` flashed; `--continuous` streaming predictions | IN PROGRESS -- flash OBSERVED, verify EXPECTED |
-| C4 | Real 38.4 MHz latency (~2x the 80 MHz estimate) | EXPECTED only |
-| C5 | Gesture over BLE, untethered | EXPECTED only |
+| C3 | `.bin` flashed; predictions streaming, gestures tracked correctly | **OBSERVED -- pass** (2026-06-07) |
+| C4 | Real 38.4 MHz latency = **~87.5 ms total / ~86 ms DSP** (~5x the 80 MHz est, not 2x) | **OBSERVED -- pass** (2026-06-07) |
+| C5 | Gesture over BLE, untethered | EXPECTED only (next step) |

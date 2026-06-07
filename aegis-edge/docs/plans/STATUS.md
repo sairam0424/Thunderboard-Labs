@@ -9,20 +9,20 @@ A quick, scannable status of the phased build. Legend:
 |-------|------|--------|
 | **Scaffold** | Workspace, runbooks, scripts, templates | ✅ done |
 | **Software layer** | Option-B C++ firmware, Web Bluetooth dashboard, CI + tests | ✅ done (C++ not compiled here — needs SSv5) |
-| **Crawl** | On-device IMU gesture recognizer | 🟡 ready for you (C0-C5 on hardware) |
-| **Walk** | On-device keyword spotting (mic) | 🟡 detailed plan written (PROVISIONAL); finalized after Crawl C4 |
+| **Crawl** | On-device IMU gesture recognizer | 🟢 C0-C4 DONE on hardware (model runs on-device, ~87.5 ms/inf measured); C5 BLE demo remaining |
+| **Walk** | On-device keyword spotting (mic) | 🟡 detailed plan written; **now has the real C4 latency anchor (~86 ms DSP @38.4 MHz)** to finalize against |
 | **Run** | Multi-sensor fusion "Smart Guardian" | 🟡 detailed plan written (PROVISIONAL); needs Option-B build + C4/W4 |
 
 ## Crawl milestones (the active phase)
 
 | # | Milestone | Owner | Status |
 |---|-----------|-------|--------|
-| C0 | Tooling + EI firmware flashed | [HUMAN] | 🟡 ready (runbook done) |
-| C1 | Labeled gesture dataset collected | [HUMAN] | 🔒 after C0 |
-| C2 | Impulse designed + trained | [HUMAN] | 🔒 after C1 |
-| C3 | Deploy back to board (Option A) | [HUMAN] | 🔒 after C2 |
-| C4 | On-device verification + **latency capture** | [HUMAN] | 🔒 after C3 — **unlocks Walk planning** |
-| C5 | BLE result streaming, offline demo | [HUMAN] | 🔒 after C3 |
+| C0 | Tooling + EI firmware flashed | [HUMAN] | ✅ done (board green/online) |
+| C1 | Labeled gesture dataset collected | [HUMAN] | ✅ done (36 samples, 5 classes, 75/25) |
+| C2 | Impulse designed + trained | [HUMAN] | ✅ done (85% test acc + anomaly) |
+| C3 | Deploy back to board (Option A) | [HUMAN] | ✅ done (live predictions verified on-device) |
+| C4 | On-device verification + **latency capture** | [HUMAN] | ✅ done — **~87.5 ms total / ~86 ms DSP @38.4 MHz measured** |
+| C5 | BLE result streaming, offline demo | [HUMAN] | 🟡 next (model is on the board; just connect a phone) |
 
 ## What is done (AI-scaffolded, verified)
 

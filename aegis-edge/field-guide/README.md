@@ -35,13 +35,13 @@ complete:
 | **C1** | 5-class IMU data collection | DONE (OBSERVED) |
 | **C2** | Impulse trained (85%) + anomaly block | DONE (OBSERVED) |
 | **EON Tuner** | Attempt to beat 85% | DONE -- kept the 85% config (OBSERVED) |
-| **C3** | Deploy `.bin` to the board | IN PROGRESS -- flashed, but live `--continuous` verify was interrupted by a serial-port issue and is **not yet confirmed streaming predictions** |
-| **C4** | On-device latency capture (real 38.4 MHz) | NOT done (EXPECTED only) |
-| **C5** | Offline BLE demo | NOT done (EXPECTED only) |
+| **C3** | Deploy `.bin` to the board | **DONE (OBSERVED 2026-06-07)** -- model verified streaming live predictions; gestures tracked correctly. Needed an I2C/hall-sensor power-cycle + `--debug` (see [troubleshooting.md](troubleshooting.md) #11) |
+| **C4** | On-device latency capture (real 38.4 MHz) | **DONE (OBSERVED 2026-06-07)** -- measured **~87.5 ms total / ~86 ms DSP** (~5x the 80 MHz est, not the extrapolated 2x; FFT-16 software-FFT fallback). See [`../benchmark/BENCHMARK.md`](../benchmark/BENCHMARK.md) |
+| **C5** | Offline BLE demo | NOT done (EXPECTED only) -- the next step |
 
-If you are continuing this work, your starting point is **C3-verify** (re-run
-`edge-impulse-run-impulse --continuous` after a board RESET -- see
-[troubleshooting.md](troubleshooting.md)), then C4 and C5.
+If you are continuing this work, your starting point is **C5** (the offline BLE phone
+demo). C0-C4 are complete and OBSERVED: the 85% gesture model runs on-device at ~87.5 ms
+per inference, verified live.
 
 ## As-Built Configuration (at a glance)
 
