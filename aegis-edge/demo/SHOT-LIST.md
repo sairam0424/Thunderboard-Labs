@@ -26,19 +26,30 @@ Two demo videos were recorded and live **in this folder locally** (`aegis-edge/d
 > and this SHOT-LIST documents it. To share them, attach the `-no-audio` cuts as
 > **GitHub Release assets** (or use Git LFS) rather than committing raw.
 
-### Edge Impulse Studio: use SCREENSHOTS, not a screen recording
+### Image assets in this folder (committed)
 
-For the EI Studio half of the story, **screenshots** beat a screen recording - the
-Studio screens are static result panels that read better as crisp stills and embed
-cleanly in a README. Capture these key screens:
+**Edge Impulse Studio screenshots** (`.png`, the crisp readable evidence):
 
-- The dataset view (5 classes, 75/25 split)
-- The Impulse design (Spectral Analysis -> NN -> anomaly blocks)
-- **The 85% confusion matrix** (the headline result)
-- The Feature explorer (shows class separation / the Circle/UpDown/ZigZag overlap)
-- The Deployment / on-device performance panel
+| File | Shows |
+|------|-------|
+| `ei-01-impulse-design.png` | The impulse pipeline: Time-series -> Spectral Analysis -> Classification + Anomaly -> 6 outputs |
+| `ei-02-spectral-dsp.png` | Spectral DSP block: raw 3-axis waveform, low-pass filter response, spectral power (~14 ms processing) |
+| `ei-03-classifier-85pct-confusion-matrix.png` | **The headline result** - 85% accuracy, ROC 0.98, per-class F1, confusion matrix, data explorer, on-device 1 ms / 3.1K RAM / 34.5K flash |
+| `ei-04-anomaly-explorer.png` | K-means anomaly clusters + on-device 3 ms / 6.3K RAM |
+| `ei-05-deployment.png` | Deployment page: Thunderboard Sense 2 target, EON Compiler, int8, perf table |
 
-Save those as `.png` in this folder (PNGs are fine to commit - they are small).
+**Video frames** (`frames/`, stills pulled from the demo `.mp4` via ffmpeg):
+
+| File | Shows |
+|------|-------|
+| `frames/demo-hero-board-terminal-studio.png` | **Hero shot** - board in hand + live terminal predictions + EI Studio on the laptop, all in one frame |
+| `frames/demo-board-led-inferring.png` | Board with the blue LED lit while inferencing |
+| `frames/demo-live-predictions.png` | Clean shot of the terminal streaming live gesture predictions |
+
+> Why this split: **screenshots** carry the precise numbers (the 85% matrix, on-device
+> timings); the **video frames** prove it runs live on real hardware. PNGs are committed;
+> the raw `.mp4` videos are gitignored (see repo `.gitignore`) - share those as GitHub
+> Release assets or via Git LFS.
 
 - **Total runtime target:** 60-90 seconds.
 - **Hardware:** Thunderboard Sense 2 on **USB power** (the RGB LEDs are **dead on
