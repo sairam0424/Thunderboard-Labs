@@ -4,6 +4,60 @@
 > is to prove the gesture recognizer runs **on the MCU itself** - **no cloud, no
 > Wi-Fi** - so the offline setup is part of the story, on camera.
 
+---
+
+## Recorded demo videos (the deliverables)
+
+Two demo videos were recorded and live **in this folder locally** (`aegis-edge/demo/`):
+
+| File | Length | Audio | Use |
+|------|--------|-------|-----|
+| `Aegis-edge-demo.mp4` | ~68 s | with sound | original recording |
+| `Aegis-Edge-Demo-2.mp4` | ~36 s | with sound | original recording |
+| `Aegis-edge-demo-no-audio.mp4` | ~68 s | **silent** | **demo cut** (audio stripped losslessly) |
+| `Aegis-Edge-Demo-2-no-audio.mp4` | ~36 s | **silent** | **demo cut** (audio stripped losslessly) |
+
+> **The `-no-audio` files are the intended demo cuts.** Audio was removed losslessly
+> (`ffmpeg -c:v copy -an` - video bitstream untouched: same H.264, 848x478, 30 fps,
+> identical duration). The originals were kept intact.
+
+> **These `.mp4` files are intentionally NOT committed to git** (see the repo
+> `.gitignore`). Large binaries bloat git history forever; demo media is kept out
+> and this SHOT-LIST documents it. To share them, attach the `-no-audio` cuts as
+> **GitHub Release assets** (or use Git LFS) rather than committing raw.
+
+### Image assets in this folder (committed)
+
+```
+demo/
+├── screenshots/   <- Edge Impulse Studio captures (the numbers)
+├── frames/        <- stills pulled from the demo video (proof it runs live)
+└── *.mp4          <- raw videos (gitignored; share via Release assets)
+```
+
+**Edge Impulse Studio screenshots** (`screenshots/`, the crisp readable evidence):
+
+| File | Shows |
+|------|-------|
+| `screenshots/ei-01-impulse-design.png` | The impulse pipeline: Time-series -> Spectral Analysis -> Classification + Anomaly -> 6 outputs |
+| `screenshots/ei-02-spectral-dsp.png` | Spectral DSP block: raw 3-axis waveform, low-pass filter response, spectral power (~14 ms processing) |
+| `screenshots/ei-03-classifier-85pct-confusion-matrix.png` | **The headline result** - 85% accuracy, ROC 0.98, per-class F1, confusion matrix, data explorer, on-device 1 ms / 3.1K RAM / 34.5K flash |
+| `screenshots/ei-04-anomaly-explorer.png` | K-means anomaly clusters + on-device 3 ms / 6.3K RAM |
+| `screenshots/ei-05-deployment.png` | Deployment page: Thunderboard Sense 2 target, EON Compiler, int8, perf table |
+
+**Video frames** (`frames/`, stills pulled from the demo `.mp4` via ffmpeg):
+
+| File | Shows |
+|------|-------|
+| `frames/demo-hero-board-terminal-studio.png` | **Hero shot** - board in hand + live terminal predictions + EI Studio on the laptop, all in one frame |
+| `frames/demo-board-led-inferring.png` | Board with the blue LED lit while inferencing |
+| `frames/demo-live-predictions.png` | Clean shot of the terminal streaming live gesture predictions |
+
+> Why this split: **screenshots** carry the precise numbers (the 85% matrix, on-device
+> timings); the **video frames** prove it runs live on real hardware. PNGs are committed;
+> the raw `.mp4` videos are gitignored (see repo `.gitignore`) - share those as GitHub
+> Release assets or via Git LFS.
+
 - **Total runtime target:** 60-90 seconds.
 - **Hardware:** Thunderboard Sense 2 on **USB power** (the RGB LEDs are **dead on
   the CR2032 coin cell** - USB is required for the LED to be visible).

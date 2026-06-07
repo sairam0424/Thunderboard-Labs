@@ -108,7 +108,7 @@ Flash by drag-and-drop:
 
 > **If you see `FAIL.TXT` on the drive** (drag-drop write rejected — gotcha 6):
 > stop here and use the fallback procedure in
-> [../FLASHING.md](../FLASHING.md) (Simplicity Studio "Upload application", or
+> [./FLASHING.md](./FLASHING.md) (Simplicity Studio "Upload application", or
 > `commander flash` with raw `.bin` at `--address 0x0`).
 
 ## Step C0.6 — Run the daemon and complete the login wizard  `[HUMAN]`
@@ -167,7 +167,7 @@ AT+CLEARCONFIG
 2. Prebuilt `.bin` filename has **no hyphens**; source build is hyphenated.
 4. `--clean` wipes daemon + device config; serial fallback is `AT+CLEARCONFIG` @115200.
 5. macOS `gyp` error = Xcode CLT missing.
-6. Drag-drop can yield `FAIL.TXT` -> see [../FLASHING.md](../FLASHING.md).
+6. Drag-drop can yield `FAIL.TXT` -> see [./FLASHING.md](./FLASHING.md).
 7. CR2032 disables RGB LEDs + CCS811 -> run on USB.
 8. Stop the daemon before `edge-impulse-run-impulse` (single serial port).
 

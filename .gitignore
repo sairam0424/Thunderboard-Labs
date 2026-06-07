@@ -23,6 +23,17 @@ autogen/
 __pycache__/
 *.pyc
 .venv/
+.pytest_cache/
+.ruff_cache/
+
+# --- Demo media (kept OUT of git history to avoid binary bloat) ---
+# Raw demo videos live in aegis-edge/demo/ locally; git stores only the
+# SHOT-LIST + screenshots. See aegis-edge/demo/SHOT-LIST.md for where the
+# actual .mp4 files are kept. If they ever need to ship in-repo, use Git LFS
+# or attach them as GitHub Release assets rather than committing raw.
+*.mp4
+*.mov
+*.m4v
 
 # --- OS cruft ---
 .DS_Store

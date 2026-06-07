@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<!--
+  Aegis Edge - Web Bluetooth Dashboard
+  =====================================
+  A browser-based alternative to the phone app for reading live, on-device
+  TinyML gesture inference streamed over BLE from a Silicon Labs Thunderboard
+  Sense 2 (BRD4166A / EFR32MG12) running the Edge Impulse firmware.
+
+  Everything runs locally in your browser. No data leaves the machine - you
+  could (and should) run this with Wi-Fi off / in airplane mode; the only
+  radio in use is Bluetooth Low Energy to the board itself.
+
+  Build / test status:
+    - Tested against a live board? NO. Written from PRIMARY-SOURCE VERIFIED
+      BLE UUIDs (see app.js). The notify-payload byte layout is NOT fully
+      documented and is parsed defensively - confirm-on-device.
+    - Requires Chrome or Edge (desktop / Android) served over https or
+      localhost. Web Bluetooth is NOT supported on iOS Safari or Firefox.
+
+  This file is the markup/UI shell only. All logic lives in app.js and all
+  styling in style.css.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <title>Aegis Edge - Live Gesture Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+
+    <!-- ===== Header ===== -->
+    <header class="app__header">
+      <div class="brand">
+        <span class="brand__mark" aria-hidden="true"></span>
+        <div class="brand__text">
+          <h1 class="brand__title">Aegis Edge</h1>
+          <p class="brand__subtitle">On-device TinyML gesture inference over BLE</p>
+        </div>
+      </div>
+
+      <!-- Connection status pill. Class toggled by app.js:
+           is-disconnected | is-connecting | is-connected -->
+      <div id="statusPill" class="status-pill is-disconnected" role="status" aria-live="polite">
+        <span class="status-pill__dot" aria-hidden="true"></span>
+        <span id="statusText" class="status-pill__text">Disconnected</span>
+      </div>
+    </header>
+
+    <!-- ===== Primary controls ===== -->
+    <section class="controls" aria-label="Connection controls">
+      <button id="connectBtn" class="btn btn--primary" type="button">
+        Connect to board
+      </button>
+
+      <!-- Start/Stop is a single toggle. Disabled until a GATT connection
+           is live. app.js flips the label + data-running attribute. -->
+      <button id="inferenceBtn" class="btn btn--accent" type="button"
+              data-running="false" disabled>
+        Start inference
+      </button>
+
+      <button id="disconnectBtn" class="btn btn--ghost" type="button" disabled>
+        Disconnect
+      </button>
+    </section>
+
+    <!-- ===== Live gesture display ===== -->
+    <section class="gesture-card" aria-label="Live gesture">
+      <p class="gesture-card__eyebrow">Detected gesture</p>
+
+      <!-- Big, legible gesture name. data-class is set to the class slug
+           (circle | zigzag | updown | leftright | none | unknown) so CSS can
+           accent the display with the suggested per-class color. -->
+      <div id="gestureName" class="gesture-card__name" data-class="none">
+        &mdash;
+      </div>
+
+      <!-- Confidence bar. The inner fill width is animated via app.js. -->
+      <div class="confidence" aria-label="Confidence">
+        <div class="confidence__track">
+          <div id="confidenceFill" class="confidence__fill" style="width: 0%"></div>
+        </div>
+        <div class="confidence__label">
+          <span>Confidence</span>
+          <span id="confidenceValue" class="confidence__value">--%</span>
+        </div>
+      </div>
+
+      <!-- Optional raw-frame readout: shows the last notify payload as hex so
+           you can reverse the real on-wire format on a live board. -->
+      <p class="gesture-card__raw">
+        Last raw frame:
+        <code id="rawFrame" class="gesture-card__rawhex">(none yet)</code>
+      </p>
+    </section>
+
+    <!-- ===== Event log ===== -->
+    <section class="log" aria-label="Event log">
+      <div class="log__head">
+        <h2 class="log__title">Event log</h2>
+        <button id="clearLogBtn" class="btn btn--mini" type="button">Clear</button>
+      </div>
+      <ul id="logList" class="log__list" aria-live="polite"></ul>
+    </section>
+
+    <!-- ===== Footer note ===== -->
+    <footer class="app__footer">
+      <p>
+        Runs fully on-device. Bluetooth only - safe to use with Wi-Fi off.
+        UUIDs are primary-source verified; the notify payload layout is parsed
+        defensively and shown as hex - <strong>confirm on a real board.</strong>
+      </p>
+    </footer>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
