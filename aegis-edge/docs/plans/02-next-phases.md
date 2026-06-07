@@ -1,15 +1,17 @@
 # Aegis Edge — Next Phases (Walk + Run)
 
-> The phased flagship is **Crawl -> Walk -> Run**. Crawl (IMU gesture) is the
-> scaffolded, in-progress phase — see [`01-implementation-plan.md`](./01-implementation-plan.md).
+> The phased flagship is **Crawl -> Walk -> Run**. Crawl (IMU gesture) is **DONE
+> (C0-C4 verified on-device)** — see [`01-implementation-plan.md`](./01-implementation-plan.md).
 > This document details the two phases that come **after** Crawl.
 >
-> **Sequencing rule:** Walk is intentionally *outlined, not finalized*, until Crawl's
-> milestone **C4** produces the **real measured 38.4 MHz inference latency**. Why:
-> Walk's whole risk is audio latency on a no-NPU M4F, and every published figure
-> (~400-470 ms) is an *extrapolation*. The real Crawl IMU number is the empirical
-> anchor we need to size the keyword-spotting model honestly. Detailed Walk planning
-> is a deliberate follow-up, not a delay.
+> **Sequencing rule (now satisfied for the anchor):** Walk was intentionally
+> *outlined, not finalized*, until Crawl's milestone **C4** produced the **real
+> measured 38.4 MHz inference latency**. C4 is now done: the measured Crawl total is
+> **~87.5 ms** (~86 ms DSP + ~1-2 ms classify), so the empirical anchor exists.
+> Critically, this measured DSP cost is **~5x** the Edge Impulse 80 MHz reference,
+> **not** the ~2x the earlier figures extrapolated — so every audio (KWS) estimate
+> below must be revised UP and then measured. Detailed Walk planning was a deliberate
+> follow-up; the anchor it waited on now exists.
 
 ---
 
@@ -17,8 +19,8 @@
 
 | Phase | Sensor | Model | Runs where | Deploy path | Status |
 |-------|--------|-------|-----------|-------------|--------|
-| **Crawl** | ICM-20648 IMU (3-axis accel) | Spectral + small Keras NN | on-device | Option A (`.bin`) | scaffolded, in progress |
-| **Walk** | ICS-43434 mic | MFCC + small int8 CNN | on-device | Option A (`.bin`) | outlined (this doc) |
+| **Crawl** | ICM-20648 IMU (3-axis accel) | Spectral + small Keras NN | on-device | Option A (`.bin`) | **DONE (C0-C4 verified on-device, ~87.5 ms measured)** — only optional C5 remains |
+| **Walk** | ICS-43434 mic | MFCC + small int8 CNN | on-device | Option A (`.bin`) | outlined (this doc) — now sized against the **real C4 anchor (~86 ms DSP @38.4 MHz)** |
 | **Run** | mic + IMU + env (Si7021/BMP280/CCS811) | multi-model fusion | on-device | **Option B (C++ / SSv5)** | outlined (this doc) |
 
 Each phase is independently demoable — if you stop after Walk you still have two
@@ -41,6 +43,14 @@ for this board.
 - The EFR32MG12 has **no NPU**, so KWS is the workload most penalized by the missing
   accelerator. Expect it to feel "responsive," not "instant."
 - EI's reported RAM figure **excludes the ~16 KB audio capture buffer** — budget it.
+- **Crawl's C4 raised the bar on the estimate.** The measured Crawl DSP came in at
+  **~86 ms — about 5x the EI 80 MHz reference, not ~2x.** The old ~400-470 ms KWS
+  figures assumed ~2x scaling, so they are now optimistic; treat the working KWS
+  estimate as **revised UP** until W4 measures it.
+- **Engage the hardware FFT.** Crawl's impulse used **FFT length 16**, which is below
+  the EFR32 hardware-FFT minimum of 32, forcing a **software FFT** (the dominant slow
+  path — see `BENCHMARK.md`). Walk's MFCC/MFE block should use an **FFT size >=32** so
+  the hardware FFT engages and the DSP cost stays in budget.
 
 ### Walk milestones
 
@@ -50,9 +60,13 @@ for this board.
 | **W1** | Collect keyword dataset | [HUMAN] | >=4 classes: 1 wake word + 1-2 commands + a **`noise`/`unknown`** class; many short (~1 s) utterances per class across voices/distances; held-out test set. |
 | **W2** | Train MFCC + small int8 CNN | [HUMAN] clicks Train; [AI] target config | Impulse: ~1 s window, **MFCC** DSP block, small int8 CNN; EON Tuner run. Acceptance: >=90% on the held-out test set with a usable confusion matrix. Keep the keyword set tiny and the model aggressively quantized. |
 | **W3** | Deploy back (Option A `.bin`) | [HUMAN] | `edge-impulse-run-impulse --continuous` streams correct keywords on-device. |
-| **W4** | **MEASURE real latency** | [HUMAN] runs; [AI] templates | A captured `--continuous` log of MFCC-DSP ms + classify ms at 38.4 MHz, pasted into `benchmark/BENCHMARK.md`. **This replaces the extrapolated ~400-470 ms with a real number** — the headline Walk deliverable. |
+| **W4** | **MEASURE real latency** | [HUMAN] runs; [AI] templates | A captured `--continuous` log of MFCC-DSP ms + classify ms at 38.4 MHz, pasted into `benchmark/BENCHMARK.md`. **This replaces the extrapolated KWS number with a real one** — the headline Walk deliverable. Note: Crawl's C4 showed DSP scales ~5x (not ~2x) off the EI reference, so the prior ~400-470 ms figure is likely an underestimate — measure, don't assume. |
 
-### Walk design notes (to finalize after Crawl C4)
+### Walk design notes (anchored to the measured Crawl C4)
+- **FFT size >=32 (the headline lesson):** Crawl's spectral block used FFT length 16,
+  below the EFR32 hardware-FFT minimum of 32, so the DSP fell back to a **software FFT**
+  and ate ~86 ms. Walk's MFCC/MFE block should pick an **FFT size of 32 or 64** so the
+  hardware FFT engages — the single biggest latency lever this board exposes.
 - **Latency mitigation:** use EI's **continuous inference with incremental/sliding-window
   MFCC** (`run_classifier_continuous`) so the DSP cost is amortized across overlapping
   frames instead of recomputed per window. The Option-B C++ already uses this pattern.
@@ -60,9 +74,10 @@ for this board.
   lower the latency. Start with 1 wake word + 1 command; grow only if latency allows.
 - **Deploy path:** still **Option A** (`.bin` drag-drop) — Walk is a single-model
   impulse, so it does not yet need the C++ path. (Run does.)
-- **What unlocks final Walk numbers:** Crawl C4's measured IMU DSP latency gives the
-  empirical M4F-at-38.4 MHz baseline to extrapolate the MFCC cost from a real datapoint
-  rather than an 80 MHz reference.
+- **The real anchor (no longer pending):** Crawl C4 measured **~87.5 ms total / ~86 ms
+  DSP** at 38.4 MHz. That is the empirical M4F baseline — and it showed DSP scales ~5x
+  off the EI 80 MHz reference, so size the MFCC estimate UP from that measured anchor,
+  then let W4 replace the estimate entirely.
 
 ### Walk risks
 | Risk | Sev | Mitigation |
@@ -142,9 +157,14 @@ Guardian and the portfolio centerpiece.
 
 ## Immediate next action
 
-Crawl is scaffolded and ready. The next concrete step is **the human executing Crawl
-milestones C0 -> C5 on the board**, following the `runbooks/`. When **C4** yields the
-measured 38.4 MHz latency, that number finalizes the **provisional** detailed Walk plan,
-[`03-walk-detailed.md`](./03-walk-detailed.md) — which is written and ready to start, with
-its latency targets explicitly flagged as extrapolations to be replaced by the C4/W4
-measurements.
+Crawl is **DONE**: C0-C4 are complete and verified on the physical board (model streaming
+live predictions on-device; latency measured at **~87.5 ms**, see
+[`01-implementation-plan.md`](./01-implementation-plan.md) and `benchmark/BENCHMARK.md`).
+The EON Tuner run is also done — its best candidate (~22%) lost badly to the hand-tuned
+85% model, so the 85% model was kept. Only **C5** (the offline BLE phone demo) remains, and
+it is **optional polish** — the on-device inference is already proven.
+
+The next substantive phase is therefore **Walk**: its latency reasoning is now anchored to
+the **real** C4 number (~86 ms DSP @38.4 MHz) rather than an 80 MHz extrapolation. The
+detailed Walk plan, [`03-walk-detailed.md`](./03-walk-detailed.md), is written and ready to
+start — with the C4 anchor and the FFT-16 -> FFT-32/64 hardware-FFT lesson folded in.

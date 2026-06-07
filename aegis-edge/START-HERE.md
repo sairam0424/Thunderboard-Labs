@@ -1,5 +1,11 @@
 # Aegis Edge — START HERE
 
+> **Status (2026-06-08): Crawl C0-C4 are DONE on this hardware.** The 85% gesture model
+> runs on-device and latency is **measured: ~87.5 ms total / ~86 ms DSP @38.4 MHz** (see
+> [`benchmark/BENCHMARK.md`](./benchmark/BENCHMARK.md)). The checklist below remains the
+> turn-key path to **reproduce** C0-C4 from scratch; only **C5** (the optional offline BLE
+> phone demo) is still open. C4's acceptance bar is already met.
+
 You have the **Thunderboard Sense 2** in hand and want to build the Crawl phase: an
 on-device IMU gesture recognizer that runs on the board, lights its LEDs by gesture, and
 streams results to a phone over Bluetooth — **no cloud, no Wi-Fi**.

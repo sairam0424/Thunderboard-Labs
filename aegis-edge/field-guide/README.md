@@ -75,6 +75,7 @@ Everything below is **OBSERVED** -- the literal values used this session.
 | **Anomaly block** | K-means, **5 components** (default), axes via "Select suggested axes" |
 | **Validation result** | **85.0%** accuracy, loss 0.37, ROC 0.98, weighted P/R/F1 = 0.85 |
 | **On-device estimate** | ~17 ms total / ~2.9 K RAM / ~49 K flash at the **80 MHz reference** (classifier alone ~1 ms) |
+| **On-device MEASURED** | **~87.5 ms total / ~86 ms DSP / ~1-2 ms classify / 0 ms anomaly @ 38.4 MHz** (~11 inferences/sec); RAM ~3.1 K, flash ~34.5 K int8. ~5x the 80 MHz estimate -- FFT-16 software-FFT fallback (FFT 32/64 = the speedup lever). See [`../benchmark/BENCHMARK.md`](../benchmark/BENCHMARK.md) |
 | **Deployment target** | "Thunderboard Sense 2" (NOT the default "C++ library"), EON Compiler, Quantized int8 |
 
 Secrets note: the Edge Impulse API key is referenced throughout as the
@@ -92,7 +93,7 @@ are worth knowing about so you do not think you mis-followed the procedure.
 | **DSP feature count** | ~33 features (estimated at a different FFT length) | **18 features** (FFT length 16, the real config) |
 | **K-means components** | 32 | **5 components** (the EON default; left as-is) |
 | **Negative class name** | `none` | **`Random`** -- same role (idle / not-a-gesture), capitalized to match the other labels (EI labels are case-sensitive) |
-| **EI reference target** | (board is 38.4 MHz) | Studio estimates against an **80 MHz** Cortex-M4F reference -- real latency is ~2x and is a C4 measure-on-device item |
+| **EI reference target** | (board is 38.4 MHz) | Studio estimates against an **80 MHz** Cortex-M4F reference. The C4 measure-on-device result was **~87.5 ms / ~86 ms DSP @ 38.4 MHz -- ~5x, not the ~2x** first extrapolated, because FFT length 16 falls back to a software FFT (FFT 32/64 is the speedup lever). See [`../benchmark/BENCHMARK.md`](../benchmark/BENCHMARK.md) |
 
 ## Table of Contents
 

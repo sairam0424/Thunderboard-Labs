@@ -2,8 +2,9 @@
 
 > **Status: PROVISIONAL — and the most ambitious phase.** Run depends on both prior
 > phases shipping (Crawl gesture model + Walk KWS model) AND on the **Option-B C++
-> firmware path** (not the no-code `.bin`). Its latency/RAM budgets are anchored to
-> estimates until the Crawl C4 and Walk W4 measurements exist. Outline:
+> firmware path** (not the no-code `.bin`). **Crawl is now done and its C4 latency is
+> measured (~87.5 ms total / ~86 ms DSP @38.4 MHz)**, so the gesture-path budget below is
+> a real number; the KWS-path budget stays an estimate until Walk W4 measures it. Outline:
 > [`02-next-phases.md`](./02-next-phases.md). Prior phase: [`03-walk-detailed.md`](./03-walk-detailed.md).
 
 ## What Run is
@@ -131,16 +132,18 @@ when one model is mid-inference.
 
 ## Model + resource sizing (finalize after C4 + W4)
 
-| Quantity | Source | Provisional | Final |
-|----------|--------|-------------|-------|
-| Gesture inference | design estimate (C4 will measure) | ~18-22 ms @38.4 MHz (DSP ~17-21 + classify ~1, extrapolated) | _C4 measured_ |
-| KWS inference | Walk W4 | ~400-470 ms @38.4 MHz (extrapolated) | _W4 measured_ |
+| Quantity | Source | Estimate | Measured / Final |
+|----------|--------|----------|------------------|
+| Gesture inference | **C4 (measured)** | — | **~87.5 ms @38.4 MHz (DSP ~86 + classify ~1-2); FFT-16 software-FFT fallback. FFT 32/64 would cut this** |
+| KWS inference | Walk W4 | ~400-470 ms @38.4 MHz (estimate — revise UP; C4 showed DSP scales ~5x not ~2x) | _W4 measured_ |
 | Env read cadence | design | every 1-5 s (slow signals) | _tune on-device_ |
-| Combined RAM | design | 2 arenas + ~16 KB audio buf + BLE stack | _verify FREE RAM on-device_ |
+| Combined RAM | design | 2 arenas + ~16 KB audio buf + BLE stack (gesture model alone: RAM ~3.1K, flash ~34.5K) | _verify FREE RAM on-device_ |
 | Fused-loop latency | R4 | dominated by KWS | _R4 measured_ |
 
-> Run cannot be sized honestly until Crawl C4 and Walk W4 produce the two real
-> per-model latencies. This table is the placeholder those measurements fill.
+> The gesture-path latency is now **measured** (Crawl C4: ~87.5 ms). Run still cannot be
+> sized completely until Walk W4 measures the KWS path; this table is the placeholder
+> that one remaining measurement fills. Note Crawl's ~86 ms was inflated by an FFT-16
+> software fallback — Run's models should use FFT >=32 where they own the DSP path.
 
 ---
 
@@ -161,9 +164,11 @@ when one model is mid-inference.
 
 Run is the **last** phase and has hard prerequisites:
 
-1. **Crawl shipped** — gesture model exists + C4 latency measured.
-2. **Walk shipped** — KWS model exists + W4 latency measured.
+1. **Crawl shipped** — ✅ DONE. Gesture model exists (85% / ROC 0.98, verified on-device)
+   and C4 latency is measured (~87.5 ms @38.4 MHz).
+2. **Walk shipped** — KWS model exists + W4 latency measured. _(Not yet — Walk is future.)_
 3. **Option-B build stood up (R0)** — the C++ path proven with one model before fusion.
+   _(Not yet.)_
 
 Only then do R1 -> R4 make sense. Attempting fusion before the single-model C++ build
 works (R0) is the classic trap — debug the toolchain/RAM/sensor-loop in isolation first.

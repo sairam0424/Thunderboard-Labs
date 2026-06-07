@@ -6,6 +6,12 @@
 > **every error hit**, and **how each was fixed** — a screenshot-of-reality, not a
 > plan.
 
+> **Update (2026-06-08):** Since this session, C3 and C4 were confirmed on-device —
+> the 85% model streams live predictions and measured latency is ~87.5 ms total /
+> ~86 ms DSP @ 38.4 MHz. Only C5 (offline BLE demo) remains. See
+> [`01-results-and-readings.md`](01-results-and-readings.md) and
+> [`../benchmark/BENCHMARK.md`](../benchmark/BENCHMARK.md).
+
 ## What this is (and how it differs from the runbooks)
 
 The prescriptive **runbooks** (`../runbooks/C0-setup.md` .. `../runbooks/C5-ble-demo.md`)

@@ -9,7 +9,7 @@ A quick, scannable status of the phased build. Legend:
 |-------|------|--------|
 | **Scaffold** | Workspace, runbooks, scripts, templates | ✅ done |
 | **Software layer** | Option-B C++ firmware, Web Bluetooth dashboard, CI + tests | ✅ done (C++ not compiled here — needs SSv5) |
-| **Crawl** | On-device IMU gesture recognizer | 🟢 C0-C4 DONE on hardware (model runs on-device, ~87.5 ms/inf measured); C5 BLE demo remaining |
+| **Crawl** | On-device IMU gesture recognizer | ✅ C0-C4 DONE on hardware (model runs on-device, ~87.5 ms/inf measured); only C5 BLE demo remaining (optional) |
 | **Walk** | On-device keyword spotting (mic) | 🟡 detailed plan written; **now has the real C4 latency anchor (~86 ms DSP @38.4 MHz)** to finalize against |
 | **Run** | Multi-sensor fusion "Smart Guardian" | 🟡 detailed plan written (PROVISIONAL); needs Option-B build + C4/W4 |
 
@@ -33,21 +33,34 @@ A quick, scannable status of the phased build. Legend:
 - ✅ `dashboard/` Web Bluetooth UI (runnable in Chrome; untested vs live board)
 - ✅ CI (`.github/workflows/ci.yml`), `Makefile`, benchmark + demo templates
 - ✅ This plan, captured at `aegis-edge/docs/plans/`
+- ✅ Crawl proven on the metal: 85% model streaming live predictions on-device,
+  ~87.5 ms/inf measured (~86 ms DSP), FFT-16 software-fallback finding documented
+- ✅ Demo assets captured under `aegis-edge/demo/` — 5 EI Studio screenshots
+  (`screenshots/`, headline `ei-03-classifier-85pct-confusion-matrix`) + 3 video
+  stills (`frames/`); recorded videos exist locally (gitignored)
 
-## What is blocked on physical hardware (yours)
+## Done on physical hardware (yours) — Crawl
 
-- ⬜ Install Edge Impulse CLI + flash firmware (C0)
-- ⬜ Physically perform + record gestures (C1)
-- ⬜ Click Train in EI Studio (C2)
-- ⬜ Deploy + measure real on-device latency (C3-C4)
-- ⬜ Point a phone / open the dashboard for the offline BLE demo (C5)
-- ⬜ Film the 60-90 s demo video
+- ✅ Installed Edge Impulse CLI + flashed firmware (C0 — board green/online)
+- ✅ Physically performed + recorded gestures (C1 — 36 samples, 5 classes, 75/25)
+- ✅ Trained in EI Studio (C2 — 85% test acc, ROC 0.98, + K-means anomaly)
+- ✅ Deployed + measured real on-device latency (C3-C4 — live predictions verified;
+  ~87.5 ms total / ~86 ms DSP @38.4 MHz). EON Tuner run too (best candidate 22% << 85%,
+  so kept the hand-tuned 85% model).
+
+## Still remaining (optional polish)
+
+- 🟡 Point a phone / open the dashboard for the offline BLE demo (C5)
+- 🟡 Film the demo video (recorded; assets in `aegis-edge/demo/` — screenshots/ + frames/)
 
 ## Next concrete action
 
-Open [`../../runbooks/C0-setup.md`](../../runbooks/C0-setup.md) and run the C0 steps on
-the board. The provisional detailed Walk plan
-([`03-walk-detailed.md`](./03-walk-detailed.md)) is written and ready; its latency
-targets get finalized once Crawl **C4** measures the real 38.4 MHz number.
+Crawl C0-C4 are DONE and verified on-device — the model streams live predictions and
+latency is measured. The only Crawl item left is **C5**, the offline BLE phone demo
+([`../../runbooks/C5-ble-demo.md`](../../runbooks/C5-ble-demo.md)), and it is optional
+polish (the model is already on the board; just connect a phone). Beyond that, the
+detailed Walk plan ([`03-walk-detailed.md`](./03-walk-detailed.md)) is written and now
+has its real latency anchor — Crawl **C4** measured ~86 ms DSP @38.4 MHz — to finalize
+its targets against.
 
-_Last updated: 2026-06-06._
+_Last updated: 2026-06-08._
