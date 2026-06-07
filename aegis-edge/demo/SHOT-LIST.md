@@ -4,6 +4,42 @@
 > is to prove the gesture recognizer runs **on the MCU itself** - **no cloud, no
 > Wi-Fi** - so the offline setup is part of the story, on camera.
 
+---
+
+## Recorded demo videos (the deliverables)
+
+Two demo videos were recorded and live **in this folder locally** (`aegis-edge/demo/`):
+
+| File | Length | Audio | Use |
+|------|--------|-------|-----|
+| `Aegis-edge-demo.mp4` | ~68 s | with sound | original recording |
+| `Aegis-Edge-Demo-2.mp4` | ~36 s | with sound | original recording |
+| `Aegis-edge-demo-no-audio.mp4` | ~68 s | **silent** | **demo cut** (audio stripped losslessly) |
+| `Aegis-Edge-Demo-2-no-audio.mp4` | ~36 s | **silent** | **demo cut** (audio stripped losslessly) |
+
+> **The `-no-audio` files are the intended demo cuts.** Audio was removed losslessly
+> (`ffmpeg -c:v copy -an` - video bitstream untouched: same H.264, 848x478, 30 fps,
+> identical duration). The originals were kept intact.
+
+> **These `.mp4` files are intentionally NOT committed to git** (see the repo
+> `.gitignore`). Large binaries bloat git history forever; demo media is kept out
+> and this SHOT-LIST documents it. To share them, attach the `-no-audio` cuts as
+> **GitHub Release assets** (or use Git LFS) rather than committing raw.
+
+### Edge Impulse Studio: use SCREENSHOTS, not a screen recording
+
+For the EI Studio half of the story, **screenshots** beat a screen recording - the
+Studio screens are static result panels that read better as crisp stills and embed
+cleanly in a README. Capture these key screens:
+
+- The dataset view (5 classes, 75/25 split)
+- The Impulse design (Spectral Analysis -> NN -> anomaly blocks)
+- **The 85% confusion matrix** (the headline result)
+- The Feature explorer (shows class separation / the Circle/UpDown/ZigZag overlap)
+- The Deployment / on-device performance panel
+
+Save those as `.png` in this folder (PNGs are fine to commit - they are small).
+
 - **Total runtime target:** 60-90 seconds.
 - **Hardware:** Thunderboard Sense 2 on **USB power** (the RGB LEDs are **dead on
   the CR2032 coin cell** - USB is required for the LED to be visible).
