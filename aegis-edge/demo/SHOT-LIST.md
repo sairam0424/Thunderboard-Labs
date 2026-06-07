@@ -28,15 +28,22 @@ Two demo videos were recorded and live **in this folder locally** (`aegis-edge/d
 
 ### Image assets in this folder (committed)
 
-**Edge Impulse Studio screenshots** (`.png`, the crisp readable evidence):
+```
+demo/
+├── screenshots/   <- Edge Impulse Studio captures (the numbers)
+├── frames/        <- stills pulled from the demo video (proof it runs live)
+└── *.mp4          <- raw videos (gitignored; share via Release assets)
+```
+
+**Edge Impulse Studio screenshots** (`screenshots/`, the crisp readable evidence):
 
 | File | Shows |
 |------|-------|
-| `ei-01-impulse-design.png` | The impulse pipeline: Time-series -> Spectral Analysis -> Classification + Anomaly -> 6 outputs |
-| `ei-02-spectral-dsp.png` | Spectral DSP block: raw 3-axis waveform, low-pass filter response, spectral power (~14 ms processing) |
-| `ei-03-classifier-85pct-confusion-matrix.png` | **The headline result** - 85% accuracy, ROC 0.98, per-class F1, confusion matrix, data explorer, on-device 1 ms / 3.1K RAM / 34.5K flash |
-| `ei-04-anomaly-explorer.png` | K-means anomaly clusters + on-device 3 ms / 6.3K RAM |
-| `ei-05-deployment.png` | Deployment page: Thunderboard Sense 2 target, EON Compiler, int8, perf table |
+| `screenshots/ei-01-impulse-design.png` | The impulse pipeline: Time-series -> Spectral Analysis -> Classification + Anomaly -> 6 outputs |
+| `screenshots/ei-02-spectral-dsp.png` | Spectral DSP block: raw 3-axis waveform, low-pass filter response, spectral power (~14 ms processing) |
+| `screenshots/ei-03-classifier-85pct-confusion-matrix.png` | **The headline result** - 85% accuracy, ROC 0.98, per-class F1, confusion matrix, data explorer, on-device 1 ms / 3.1K RAM / 34.5K flash |
+| `screenshots/ei-04-anomaly-explorer.png` | K-means anomaly clusters + on-device 3 ms / 6.3K RAM |
+| `screenshots/ei-05-deployment.png` | Deployment page: Thunderboard Sense 2 target, EON Compiler, int8, perf table |
 
 **Video frames** (`frames/`, stills pulled from the demo `.mp4` via ffmpeg):
 
