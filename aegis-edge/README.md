@@ -35,20 +35,21 @@ Follow the runbooks in `runbooks/` in order. Steps are tagged **[HUMAN]**
 (physical / browser actions only you can do on real hardware) or
 **[AI-SCAFFOLDED]** (files generated into this repo that you run/follow).
 
-1. **C0 — Environment & tooling** (`runbooks/C0-environment.md`): Node 22 LTS,
-   `edge-impulse-cli`, OS prerequisites, serial sanity checks.
-2. **C1 — Flash EI firmware** (`runbooks/C1-flash-firmware.md`): drag the
-   prebuilt `silabs-thunderboard-sense2.bin` onto TB004.
-3. **C2 — Data acquisition** (`runbooks/C2-data-acquisition.md`): capture gesture
-   samples in Studio (62.5 Hz, 10s windows, 5 classes).
-4. **C3 — Impulse design & training** (`runbooks/C3-impulse-training.md`):
-   Spectral Analysis DSP + Keras NN + K-means anomaly; mirror
-   `edge-impulse/PROJECT-CONFIG.md`.
-5. **C4 — Deploy & on-device verify** (`runbooks/C4-deploy-verify.md`): build the
-   board `.bin`, flash, run `edge-impulse-run-impulse --continuous`, capture the
-   headline latency benchmark.
-6. **C5 — BLE streaming demo** (`runbooks/C5-ble-demo.md`): stream results over
-   the verified GATT UUIDs to Simplicity Connect, phone in airplane mode.
+1. **C0 — Setup, flash & pair** ([`runbooks/C0-setup.md`](./runbooks/C0-setup.md)): Node + `edge-impulse-cli`,
+   flash the prebuilt `silabs-thunderboard-sense2.bin` onto TB004, pair the board to your EI project.
+2. **C1 — Data collection** ([`runbooks/C1-data-collection.md`](./runbooks/C1-data-collection.md)): capture
+   gesture samples in Studio (62.5 Hz, 10 s windows, 5 classes incl. a negative class).
+3. **C2 — Design & train the impulse** ([`runbooks/C2-train.md`](./runbooks/C2-train.md)):
+   Spectral Analysis DSP + Keras NN + K-means anomaly; mirror `edge-impulse/PROJECT-CONFIG.md`.
+4. **C3 — Deploy** ([`runbooks/C3-deploy.md`](./runbooks/C3-deploy.md)): build the board `.bin`
+   (target "Thunderboard Sense 2", int8, EON Compiler), flash to TB004.
+5. **C4 — Verify & benchmark** ([`runbooks/C4-verify-benchmark.md`](./runbooks/C4-verify-benchmark.md)):
+   run `edge-impulse-run-impulse --continuous`, capture the headline on-device latency.
+6. **C5 — Offline BLE demo** ([`runbooks/C5-ble-demo.md`](./runbooks/C5-ble-demo.md)): stream results over
+   the verified GATT UUIDs to Simplicity Connect (or the `dashboard/`), phone in airplane mode.
+
+> Flashing trouble? See [`runbooks/FLASHING.md`](./runbooks/FLASHING.md). Hit any other snag?
+> The [`field-guide/troubleshooting.md`](./field-guide/troubleshooting.md) catalogs every error from a real bring-up.
 
 > An **Option B** portfolio/fusion path (export the impulse as a C++ library and
 > call `run_classifier(...)` inside a Simplicity Studio 5 / Gecko SDK project)
@@ -67,27 +68,46 @@ validate on your hardware, not facts.
 
 ## Documentation
 
-The conceptual guide lives at
-[`../docs/thunderboard-sense-2/aegis-edge/aegis-edge-guide.md`](../docs/thunderboard-sense-2/aegis-edge/aegis-edge-guide.md)
-and the hardware docs at
-[`../docs/thunderboard-sense-2/`](../docs/thunderboard-sense-2/). **This
-`aegis-edge/` folder is the buildable project.**
+- **Start here (bench-ready):** [`START-HERE.md`](./START-HERE.md) — one-page C0->C5 checklist.
+- **Plans:** [`docs/plans/`](./docs/plans/) — Crawl plan, next-phases (Walk/Run), status.
+- **Field guide (as-built):** [`field-guide/`](./field-guide/README.md) — the *lived* record of a
+  real bring-up: actual values, observed outputs, deviations from plan, and a full
+  [`troubleshooting.md`](./field-guide/troubleshooting.md) error catalog (dongle, flashing,
+  daemon, auth, etc.).
+- **Conceptual guide:** [`../docs/thunderboard-sense-2/aegis-edge/aegis-edge-guide.md`](../docs/thunderboard-sense-2/aegis-edge/aegis-edge-guide.md)
+  and the hardware docs at [`../docs/thunderboard-sense-2/`](../docs/thunderboard-sense-2/).
+
+> **runbooks/** = prescriptive (what *should* happen). **field-guide/** = as-built (what
+> *actually* happened, with fixes). Read the runbook for a step, keep the field guide open
+> for reality + troubleshooting.
 
 ## Repo layout
 
 ```
 aegis-edge/
 ├── README.md                     # this file
+├── START-HERE.md                 # one-page bench-ready C0->C5 checklist
 ├── .gitignore
+├── Makefile                      # make check / test / lint / serve-dashboard
+├── docs/plans/                   # Crawl plan, next-phases (Walk/Run), STATUS
 ├── edge-impulse/
-│   └── PROJECT-CONFIG.md          # canonical impulse spec to mirror in Studio
-│                                  # (drop the exported EI project .zip here)
-├── runbooks/
-│   ├── C0-environment.md          # tooling + serial sanity
-│   ├── C1-flash-firmware.md       # prebuilt .bin -> TB004
-│   ├── C2-data-acquisition.md     # gesture capture in Studio
-│   ├── C3-impulse-training.md     # DSP + NN + anomaly
-│   ├── C4-deploy-verify.md        # build, flash, measure latency
-│   └── C5-ble-demo.md             # BLE streaming + Option B
-└── scripts/                       # helper scripts (serial, flashing aids)
+│   └── PROJECT-CONFIG.md          # canonical impulse spec (drop EI export .zip here)
+├── runbooks/                     # prescriptive step-by-step
+│   ├── C0-setup.md                # tooling + flash EI firmware + pair daemon
+│   ├── C1-data-collection.md      # gesture capture in Studio
+│   ├── C2-train.md                # DSP + NN + anomaly
+│   ├── C3-deploy.md               # build + flash the trained .bin
+│   ├── C4-verify-benchmark.md     # run-impulse --continuous + latency
+│   ├── C5-ble-demo.md             # offline BLE streaming demo
+│   └── FLASHING.md                # 3 flash paths + FAIL.TXT recovery
+├── field-guide/                  # AS-BUILT: real values, observed outputs, errors+fixes
+│   ├── README.md
+│   ├── 00-session-walkthrough.md  (+ -part2)
+│   ├── 01-results-and-readings.md # what you should SEE at each checkpoint
+│   └── troubleshooting.md         # the error catalog
+├── firmware-option-b/            # C++ run_classifier integration (Run phase)
+├── dashboard/                    # Web Bluetooth dashboard (read results in Chrome)
+├── benchmark/                    # latency benchmark template
+├── demo/                         # offline demo video shot-list
+└── scripts/                      # check-tooling.sh, serial-bench-parse.py + tests
 ```

@@ -38,6 +38,11 @@ your phone (or use the `dashboard/` in Chrome), and a data-capable micro-USB cab
 
 Flashing trouble (`FAIL.TXT`)? -> [`runbooks/FLASHING.md`](./runbooks/FLASHING.md) (3 paths).
 
+**Hit a snag (dongle, drive won't mount, daemon won't quit, login fails)?** ->
+[`field-guide/troubleshooting.md`](./field-guide/troubleshooting.md) is the as-built error
+catalog — every problem from a real bring-up with its exact fix. The full lived walkthrough
+(real values + observed outputs) is in [`field-guide/`](./field-guide/README.md).
+
 ---
 
 ## The one number that matters most
