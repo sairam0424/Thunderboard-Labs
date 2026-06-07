@@ -287,6 +287,33 @@ Simplicity Studio / Commander) and the board rebooted into the new firmware (Iss
 
 ---
 
+## 11. `failed to init hall sensor (0x0031)` / inference starts but prints nothing
+
+| Field | Detail |
+|-------|--------|
+| **Symptom** | After flashing the model and running `edge-impulse-run-impulse`, one of two things happens: (a) it prints `ERR: failed to init hall sensor (0x0031)` and drops to the `>` AT prompt without inferencing; OR (b) it prints the "Inferencing settings" + "Starting inferencing, press 'b' to break" then goes **totally silent** -- no prediction blocks even when you move the board, and the LED does not react to motion. |
+| **Cause** | The shared **I2C bus is wedged**. The EI firmware initializes the *whole* onboard sensor suite at run start (not just the accelerometer your model uses). The Si7210 hall sensor and the ICM-20648 IMU are on the same I2C bus; if a sensor is mid-transaction when the bus gets reset (common right after a flash-reboot or a daemon<->run-impulse handoff), init either errors out (case a) or blocks forever so no window ever completes (case b). |
+| **Fix** | A **`RESET` press alone often is NOT enough** -- it resets the MCU but the I2C lines can stay latched. Do a **full cold power cycle**: `Ctrl+C` -> **unplug USB** -> wait ~15 s (lets the bus capacitance drain) -> replug -> wait ~5 s -> re-run. **Also: run with `--debug`** -- in this session plain/`--continuous` mode stayed silent after recovery, but `edge-impulse-run-impulse --debug` both flushed the output AND printed the diagnostic FFT line. |
+
+```bash
+# After Ctrl+C, unplug the board, wait ~15s, replug, then:
+edge-impulse-run-impulse --debug
+# then physically move the board for a few seconds
+```
+
+**How to confirm it's fixed:** you get past "Starting inferencing" into repeating
+`Timing: DSP .. ms, inference .. ms` + `#Classification predictions:` blocks, and the
+correct gesture wins (e.g. moving in a circle -> `Circle` highest). OBSERVED this session:
+DSP ~86 ms, inference ~1-2 ms at 38.4 MHz (see [../benchmark/BENCHMARK.md](../benchmark/BENCHMARK.md)).
+
+> **Bonus diagnostic `--debug` surfaces:** `INFO: HW RFFT failed, FFT size not supported.
+> Must be a power of 2 between 32 and 4096, (size was 16)`. This is **harmless** (the DSP
+> falls back to a software FFT because the impulse uses FFT length 16 < the hardware
+> minimum of 32) -- but it explains why DSP latency is ~86 ms. Using FFT length 32/64 in
+> the impulse would let the hardware FFT engage and speed up the DSP.
+
+---
+
 ## The one golden rule
 
 > **LED on but no `TB004` drive == it's the data path, not the board.**
