@@ -1,0 +1,15 @@
+# Dependabot configuration for Thunderboard-Labs.
+#
+# This is an embedded firmware / documentation project. The only tracked
+# manifest-free ecosystem in the repo is GitHub Actions (the CI workflow at
+# .github/workflows/ci.yml). There is no requirements.txt, pyproject.toml,
+# Pipfile, or package.json anywhere in the tree - the CI job installs
+# ruff/pytest inline, and aegis-edge/scripts/*.py is stdlib-only - so no
+# additional package-ecosystem entry is applicable yet. Add one here if a
+# real dependency manifest is introduced later.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
