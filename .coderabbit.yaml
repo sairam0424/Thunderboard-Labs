@@ -1,0 +1,27 @@
+language: en-US
+tone_instructions: "This is an embedded/edge-ML firmware project with a plain-JS dashboard. Flag memory-safety and resource-constraint issues in firmware code over style."
+enable_free_tier: true
+
+reviews:
+  profile: chill
+  auto_review:
+    enabled: true
+    ignore_usernames: ["dependabot[bot]"]
+  path_instructions:
+    - path: "aegis-edge/firmware-option-b/src/**"
+      instructions: >
+        This is embedded C++ firmware running on constrained hardware.
+        Flag heap allocation in hot paths, missing bounds checks on
+        sensor/inference buffers, and any blocking call that could stall
+        the main loop.
+    - path: "aegis-edge/dashboard/**"
+      instructions: "Plain JS, no build step. Flag unescaped data written to the DOM (XSS) and missing error handling on fetch calls."
+  tools:
+    eslint:
+      enabled: true
+    gitleaks:
+      enabled: true
+
+knowledge_base:
+  learnings:
+    scope: local
