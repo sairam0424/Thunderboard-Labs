@@ -1,0 +1,55 @@
+# CodeQL code scanning for Thunderboard-Labs.
+# ---------------------------------------------------------------------------
+# Covers the two CodeQL-supported languages actually present in this repo:
+# Python (aegis-edge/scripts/serial-bench-parse.py + tests) and JavaScript
+# (aegis-edge/dashboard/app.js, the Web Bluetooth dashboard).
+#
+# NOT covered here (honest scope, same reason ci.yml gives for skipping the
+# firmware in its own jobs): the C++ firmware under aegis-edge/firmware-option-b
+# requires the Silicon Labs GSDK 4.0.2 + GNU Arm toolchain, built in Simplicity
+# Studio 5, and cannot be built (and therefore cannot be CodeQL-analyzed) on a
+# GitHub-hosted runner.
+name: CodeQL
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Weekly, independent of any push/PR activity - catches new CodeQL query
+    # findings on unchanged code.
+    - cron: "0 5 * * 1"
+
+concurrency:
+  group: codeql-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [python, javascript]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@faaca9a8f6edddba5725ffe5adefdab6669a2eca # v3.38.0
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@faaca9a8f6edddba5725ffe5adefdab6669a2eca # v3.38.0
+        with:
+          category: "/language:${{ matrix.language }}"
