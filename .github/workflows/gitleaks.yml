@@ -1,0 +1,47 @@
+# Standalone secret scanning for Thunderboard-Labs.
+# ---------------------------------------------------------------------------
+# CodeRabbit's built-in gitleaks tool (.coderabbit.yaml) only runs inside
+# CodeRabbit's own review service and may not auto-trigger on every PR on a
+# low-star public repo. This workflow gives repo-owned, CodeRabbit-independent
+# secret-scanning coverage on every push/PR, on top of GitHub's native secret
+# scanning + push protection (which only cover pushed history, not PR diffs
+# before merge).
+#
+# No GITLEAKS_LICENSE is configured: per gitleaks-action's own docs, a license
+# is only required for GitHub Organization accounts, not personal accounts,
+# and this repo is owned by a personal account (sairam0424).
+name: gitleaks
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Weekly full-history rescan, offset from the CodeQL/Scorecard crons.
+    - cron: "0 4 * * 3"
+
+concurrency:
+  group: gitleaks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    name: gitleaks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # gitleaks-action comments findings on the PR
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -77,11 +77,18 @@ jobs:
       - name: Install lint + test tooling
         run: |
           python -m pip install --upgrade pip
-          python -m pip install ruff pytest
+          python -m pip install ruff mypy pytest
 
       - name: Ruff lint (scripts/)
         # The parser is stdlib-only; ruff catches style + obvious bugs.
         run: ruff check aegis-edge/scripts
+
+      - name: Mypy type check (scripts/)
+        # Stdlib-only script (argparse/re/sys) - no third-party stubs needed.
+        # Default (non-strict) mode: the script currently has no type
+        # annotations, so --strict would fail on day one and force an
+        # unrelated source rewrite. This still catches real type errors.
+        run: mypy aegis-edge/scripts/serial-bench-parse.py
 
       - name: Pytest
         # Tests import serial-bench-parse.py by file path (hyphenated name) via
